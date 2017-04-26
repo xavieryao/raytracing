@@ -12,7 +12,8 @@ struct Ray {
     cv::Vec3d direction;
 
     Ray(cv::Vec3d origin, cv::Vec3d direction) {
-        this->origin = origin, this->direction = direction;
+        this->origin = origin;
+        this->direction = direction;
     }
 
     void repr() const {
