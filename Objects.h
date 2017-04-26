@@ -16,6 +16,8 @@
 struct AABB {
     cv::Vec3f bounds[2];
 
+    AABB() {}
+
     AABB(cv::Vec3f min, cv::Vec3f max) {
         this->bounds[0] = min;
         this->bounds[1] = max;
@@ -60,6 +62,7 @@ public:
     cv::Vec3b ks; /* ks: specular coefficient, or the specular color, of the surface. */
     cv::Vec3b ka; /* ka: the surface's ambient coefficient, or the ambient color. */
     int p; /* Phong exponent */
+    AABB aabb;
 
     virtual ~Object() {};
     virtual float intersect(Ray ray) const = 0;
