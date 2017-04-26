@@ -6,7 +6,7 @@
 
 double Object::NO_INTERSECTION = -3;
 
-double Sphere::intersect(Ray ray) {
+double Sphere::intersect(Ray ray) const {
     auto& d = ray.direction;
     auto& e = ray.origin;
     auto& c = center;
@@ -31,6 +31,6 @@ Sphere::Sphere(double x, double y, double z, double radius, cv::Vec3b color, cv:
     this->p = p;
 }
 
-void Sphere::repr() {
+void Sphere::repr() const {
     printf("(%f, %f, %f) R=%f\n", center[0], center[1], center[2], radius);
 }

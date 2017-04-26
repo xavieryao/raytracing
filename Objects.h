@@ -20,8 +20,8 @@ public:
     int p;
 
     virtual ~Object() = 0;
-    virtual double intersect(Ray ray) = 0;
-    virtual void repr() = 0;
+    virtual double intersect(Ray ray) const = 0;
+    virtual void repr() const = 0;
 };
 
 class Sphere : public Object {
@@ -30,8 +30,8 @@ private:
     double radius;
 public:
     Sphere(double x, double y, double z, double radius, cv::Vec3b color = cv::Vec3b(255,255,255), cv::Vec3b ks = cv::Vec3b(255,255,255), int p = 100)
-    double intersect(Ray ray) override;
-    void repr() override;
+    double intersect(Ray ray) const override;
+    void repr() const override;
 };
 
 
