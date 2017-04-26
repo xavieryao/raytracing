@@ -8,16 +8,28 @@
 #include "Objects.h"
 #include "Light.h"
 #include <vector>
+#include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
+#include <string>
+
+typedef cv::Vec3b Color;
+typedef cv::Vec3d Vec;
 
 class World {
 private:
-    std::vector<Object> objects;
-    std::vector<Light> lightSources;
+    std::vector<Object*> objects;
+    std::vector<Light*> lightSources;
+    std::string name;
 
 public:
-    void addObject(Object& obj);
-    void addLightSource(Light& l);
-    void render(cv::Vec3d eye, double l, double r, double b, double t, double d) const;
+    explicit World(std::string name="Brave New World");
+    std::string getName() const;
+    void setName(std::string name);
+    void addObject(Object* obj);
+    void addLightSource(Light* l);
+    void render(double l, double r, double b, double t, double d, int nx = 512, int ny = 512,
+                cv::Vec3d eye = cv::Vec3d(0, 0, 0), cv::Scalar bgColor = cv::Scalar(255, 255, 255)) const;
+    ~World();
 };
 
 

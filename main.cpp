@@ -2,18 +2,16 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 
-#include "Objects.h"
+#include "World.h"
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
-    auto white = cv::Vec3b(0x99,0xff,0x66);
-    auto image = cv::Mat(301,260, CV_8UC3, cv::Scalar(0x99, 0xff, 0x66));
-    for (int i = 0; i < 50; ++i) {
-        image.at<cv::Vec3b>(5, i) = cv::Vec3b(255,255,255);
-    }
-    cv::imshow("image", image);
-    cv::waitKey();
 
-    Sphere sp(0,0,0,10);
+    World w;
+    Light* light = new Light(cv::Vec3d(10, 0, 0));
+    Sphere* sp = new Sphere(0, 0, 20, 10, Color(100, 123, 5), Color(255, 255, 255));
+    w.addLightSource(light);
+    w.addObject(sp);
+    w.render(-15, 15, -15, 15, 3);
     return 0;
 }
