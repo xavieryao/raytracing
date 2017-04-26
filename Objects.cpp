@@ -29,13 +29,10 @@ float Sphere::intersect(Ray ray) const {
     return t;
 }
 
-Sphere::Sphere(cv::Vec3f center, float radius, cv::Vec3b color, cv::Vec3b ks, cv::Vec3b ka, int p) {
+Sphere::Sphere(cv::Vec3f center, float radius, Material& mat) {
     this->center = center;
     this->radius = radius;
-    this->color = color;
-    this->ks = ks;
-    this->ka = ka;
-    this->p = p;
+    this->material = mat;
     auto vec_r = cv::Vec3f(radius, radius, radius);
     this->aabb = AABB(center-vec_r, center+vec_r);
 }

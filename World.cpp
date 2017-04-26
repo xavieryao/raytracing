@@ -75,7 +75,7 @@ Color World::rayTracing(Ray& ray) const {
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
 
-    Color color = object->ka * aIntensity;
+    Color color = object->material.ka * aIntensity;
     for (Light* light: lightSources) {
         Vec lt = normalize(light->position - intersection);
 
@@ -84,8 +84,8 @@ Color World::rayTracing(Ray& ray) const {
         if (hit(s, shadowRay, 0.01)) return color;
 
         Vec h = normalize(v + lt);
-        color += object->color * light->intensity * std::max(0.0, n.ddot(lt));
-        color += object->ks * light->intensity * std::pow(std::max(0.0, n.ddot(h)), object->p);
+        color += object->material.color * light->intensity * std::max(0.0, n.ddot(lt));
+        color += object->material.ks * light->intensity * std::pow(std::max(0.0, n.ddot(h)), object->material.p);
     }
     return color;
 }

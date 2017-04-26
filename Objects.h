@@ -6,6 +6,7 @@
 #define RAYTRACING_OBJECT_H
 
 #include "Ray.h"
+#include "Material.h"
 #include <cstdio>
 #include <cmath>
 #include <algorithm>
@@ -58,10 +59,7 @@ class Object {
 public:
     static float NO_INTERSECTION;
 
-    cv::Vec3b color; /* kd: diffuse coefficient, or the surface color */
-    cv::Vec3b ks; /* ks: specular coefficient, or the specular color, of the surface. */
-    cv::Vec3b ka; /* ka: the surface's ambient coefficient, or the ambient color. */
-    int p; /* Phong exponent */
+    Material material;
     AABB aabb;
 
     virtual ~Object() {};
@@ -75,11 +73,7 @@ private:
     cv::Vec3f center;
     float radius;
 public:
-    Sphere(cv::Vec3f center, float radius
-            , cv::Vec3b color = cv::Vec3b(255,255,255)
-            , cv::Vec3b ks = cv::Vec3b(255,255,255)
-            , cv::Vec3b ka = cv::Vec3b(255, 255, 255)
-            , int p = 100);
+    Sphere(cv::Vec3f center, float radius, Material& mat);
     float intersect(Ray ray) const override;
     void repr() const override;
     cv::Vec3f normalVector(cv::Vec3f point) const override;
