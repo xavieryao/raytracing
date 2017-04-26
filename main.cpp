@@ -2,6 +2,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 
+#include "Objects.h"
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
     auto white = cv::Vec3b(0x99,0xff,0x66);
@@ -11,5 +13,7 @@ int main() {
     }
     cv::imshow("image", image);
     cv::waitKey();
+
+    Sphere sp;
     return 0;
 }

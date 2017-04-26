@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-set(SOURCE_FILES main.cpp Ray.cpp Ray.h)
+set(SOURCE_FILES main.cpp Ray.h Objects.h Objects.cpp)
 add_executable(raytracing ${SOURCE_FILES})
 
 target_link_libraries(raytracing ${OpenCV_LIBS} )
