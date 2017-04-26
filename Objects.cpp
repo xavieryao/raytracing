@@ -45,3 +45,22 @@ cv::Vec3f Sphere::normalVector(cv::Vec3f point) const {
     auto vec = point-center;
     return vec/cv::norm(vec);
 }
+
+float Plane::intersect(Ray ray) const {
+    float t = -static_cast<float>((d + n.ddot(ray.origin))/(n.ddot(ray.direction)));
+    return t;
+}
+
+Plane::Plane(cv::Vec3f n, float d, Material& m) {
+    this->n = n/cv::norm(n);
+    this->d = d;
+    this->material = m;
+}
+
+void Plane::repr() const {
+    printf("N: (%f, %f, %f) D: %f\n", n[0], n[1], n[2], d);
+}
+
+cv::Vec3f Plane::normalVector(cv::Vec3f point) const {
+    return n;
+}

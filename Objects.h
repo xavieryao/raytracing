@@ -61,6 +61,7 @@ public:
 
     Material material;
     AABB aabb;
+    std::string type = "Object";
 
     virtual ~Object() {};
     virtual float intersect(Ray ray) const = 0;
@@ -72,6 +73,8 @@ class Sphere : public Object {
 private:
     cv::Vec3f center;
     float radius;
+    std::string type = "Sphere";
+
 public:
     Sphere(cv::Vec3f center, float radius, Material& mat);
     float intersect(Ray ray) const override;
@@ -79,5 +82,17 @@ public:
     cv::Vec3f normalVector(cv::Vec3f point) const override;
 };
 
+class Plane : public Object {
+private:
+    cv::Vec3f n;
+    float d;
+    std::string type = "Plane";
+
+public:
+    Plane(cv::Vec3f n, float d, Material& m);
+    float intersect(Ray ray) const override;
+    void repr() const override;
+    cv::Vec3f normalVector(cv::Vec3f point) const override;
+};
 
 #endif //RAYTRACING_OBJECT_H

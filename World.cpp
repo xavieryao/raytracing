@@ -18,12 +18,13 @@ void World::addObject(Object* obj) {
 void World::render(float l, float r, float b, float t, float d, int nx, int ny, cv::Vec3f eye) const {
     auto image = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
 
+    std::cout << "render" << std::endl;
     auto uu = Vec(1, 0, 0);
     auto vv = Vec(0, 1, 0);
     auto ww = Vec(0, 0, -1);
 
     for (int i = 0; i < ny; ++i) {
-        printf("column %d\r", i);
+        printf("column %d\n", i);
         for (int j = 0; j < nx; ++j) {
             auto u = l + (r - l) * (i + 0.5) / ny;
             auto v = b + (t - b) * (j + 0.5) / nx;
@@ -81,11 +82,11 @@ Color World::rayTracing(Ray& ray) const {
 
         Ray shadowRay(intersection, lt);
         float s;
-        if (hit(s, shadowRay, 0.01)) return color;
-
-        Vec h = normalize(v + lt);
-        color += object->material.color * light->intensity * std::max(0.0, n.ddot(lt));
-        color += object->material.ks * light->intensity * std::pow(std::max(0.0, n.ddot(h)), object->material.p);
+        if (!hit(s, shadowRay, 0.01)) {
+            Vec h = normalize(v + lt);
+            color += object->material.color * light->intensity * std::max(0.0, n.ddot(lt));
+            color += object->material.ks * light->intensity * std::pow(std::max(0.0, n.ddot(h)), object->material.p);
+        }
     }
     return color;
 }
@@ -103,6 +104,10 @@ Object *World::hit(float &t, Ray& ray, float epsilon) const {
             t = tt;
             object = obj;
         }
+    }
+    if (object) {
+//        printf("hit ");
+//        object->repr();
     }
     return object;
 }
