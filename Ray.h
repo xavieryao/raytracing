@@ -8,12 +8,18 @@
 #include <cstdio>
 
 struct Ray {
-    cv::Vec3d origin;
-    cv::Vec3d direction;
+    cv::Vec3f origin;
+    cv::Vec3f direction;
+    cv::Vec3f invDir;
+    int sign[3];
 
-    Ray(cv::Vec3d origin, cv::Vec3d direction) {
+    Ray(cv::Vec3f origin, cv::Vec3f direction) {
         this->origin = origin;
         this->direction = direction;
+        for (int i = 0; i < 3; i++) {
+            invDir[i] = 1/direction[i];
+            sign[i] = invDir[i] < 0;
+        }
     }
 
     void repr() const {

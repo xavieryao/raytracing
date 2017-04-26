@@ -13,7 +13,7 @@
 #include <string>
 
 typedef cv::Vec3b Color;
-typedef cv::Vec3d Vec;
+typedef cv::Vec3f Vec;
 
 class World {
 private:
@@ -21,19 +21,19 @@ private:
     std::vector<Light*> lightSources;
     std::string name;
     Color bgColor;
-    double aIntensity;
+    float aIntensity;
 
     Color rayTracing(Ray& ray) const;
     static Vec normalize(Vec v);
 
 public:
-    World(Color bgColor = Color(255,255,255), double aIntensity = 0, std::string name="Brave New World");
+    World(Color bgColor = Color(255,255,255), float aIntensity = 0, std::string name="Brave New World");
     std::string getName() const;
     void setName(std::string name);
     void addObject(Object* obj);
     void addLightSource(Light* l);
-    void render(double l, double r, double b, double t, double d, int nx = 512, int ny = 512,
-                cv::Vec3d eye = cv::Vec3d(0, 0, 0)) const;
+    void render(float l, float r, float b, float t, float d, int nx = 512, int ny = 512,
+                cv::Vec3f eye = cv::Vec3f(0, 0, 0)) const;
     ~World();
 };
 

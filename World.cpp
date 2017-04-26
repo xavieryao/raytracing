@@ -15,7 +15,7 @@ void World::addObject(Object* obj) {
  * d: view depth
  * nx, ny: height and width
  */
-void World::render(double l, double r, double b, double t, double d, int nx, int ny, cv::Vec3d eye) const {
+void World::render(float l, float r, float b, float t, float d, int nx, int ny, cv::Vec3f eye) const {
     auto image = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
 
     auto uu = Vec(1, 0, 0);
@@ -23,6 +23,7 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
     auto ww = Vec(0, 0, -1);
 
     for (int i = 0; i < ny; ++i) {
+        printf("column %d\r", i);
         for (int j = 0; j < nx; ++j) {
             auto u = l + (r - l) * (i + 0.5) / ny;
             auto v = b + (t - b) * (j + 0.5) / nx;
@@ -31,8 +32,10 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
             image.at<Color>(j, i) = rayTracing(ray);
         }
     }
-    cv::imshow(name, image);
-    cv::waitKey();
+//    cv::imshow(name, image);
+//    cv::waitKey();
+    auto filename = "/Users/xavieryao/cg/rt/"+name+".png";
+    cv::imwrite(filename, image);
 }
 
 void World::addLightSource(Light* l) {
@@ -56,14 +59,14 @@ std::string World::getName() const {
     return name;
 }
 
-World::World(Color bgColor, double aIntensity, std::string name) {
+World::World(Color bgColor, float aIntensity, std::string name) {
     this->name = name;
     this->aIntensity = aIntensity;
     this->bgColor = bgColor;
 }
 
 Color World::rayTracing(Ray& ray) const {
-    double t = INT_MAX;
+    float t = INT_MAX;
     Object* object = nullptr;
     for (auto obj : objects) {
         auto tt = obj->intersect(ray);

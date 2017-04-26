@@ -12,10 +12,10 @@
  * point light source
  */
 struct Light {
-    cv::Vec3d position;
+    cv::Vec3f position;
     double intensity;
 
-    Light(cv::Vec3d pos, double intensity = 1) {
+    Light(cv::Vec3f pos, double intensity = 1) {
         this->position = pos;
         this->intensity = intensity;
     }
