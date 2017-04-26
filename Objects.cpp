@@ -11,13 +11,14 @@ double Sphere::intersect(Ray ray) const {
     auto& e = ray.origin;
     auto& c = center;
     auto ec = e-c;
-    auto dd = d.mul(d);
-    auto delta = pow(d.mul(ec), 2) - dd*(ec.mul(ec) - pow(radius, 2));
+    auto dd = d.ddot(d);
+    auto delta = std::pow(d.ddot(ec), 2) - dd*(ec.ddot(ec) - std::pow(radius, 2));
     if (delta < 0)
         return Object::NO_INTERSECTION;
 
-    auto t1 = (-d.mul(ec)+std::sqrt(delta))/d.mul(d);
-    auto t2 = (-d.mul(ec)+std::sqrt(delta))/d.mul(d);
+    auto sqrt_delta = std::sqrt(delta);
+    auto t1 = (-d.ddot(ec)+sqrt_delta)/dd;
+    auto t2 = (-d.ddot(ec)-sqrt_delta)/dd;
     auto t = std::min(t1, t2);
     if (t < 0) return NO_INTERSECTION;
     return t;

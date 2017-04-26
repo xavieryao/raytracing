@@ -14,6 +14,6 @@ int main() {
     cv::imshow("image", image);
     cv::waitKey();
 
-    Sphere sp;
+    Sphere sp(0,0,0,10);
     return 0;
 }
