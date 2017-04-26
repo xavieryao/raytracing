@@ -3,6 +3,8 @@
 //
 
 #include "World.h"
+#include "tqdm/tqdm.h"
+
 
 void World::addObject(Object* obj) {
     objects.push_back(obj);
@@ -20,6 +22,7 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
     auto vv = Vec(0, 1, 0);
     auto ww = Vec(0, 0, -1);
 
+    
     cv::imshow(name, image);
     cv::waitKey();
 }
