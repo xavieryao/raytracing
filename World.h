@@ -24,6 +24,7 @@ private:
     float aIntensity;
 
     Color rayTracing(Ray& ray) const;
+    Object* hit(float& t, Ray& ray, float epsilon = .0) const;
     static Vec normalize(Vec v);
 
 public:

@@ -66,15 +66,8 @@ World::World(Color bgColor, float aIntensity, std::string name) {
 }
 
 Color World::rayTracing(Ray& ray) const {
-    float t = INT_MAX;
-    Object* object = nullptr;
-    for (auto obj : objects) {
-        auto tt = obj->intersect(ray);
-        if (tt > 0 && tt < t) {
-            t = tt;
-            object = obj;
-        }
-    }
+    float t;
+    Object* object = hit(t, ray);
     if (object == nullptr) {
         return bgColor;
     }
@@ -85,6 +78,11 @@ Color World::rayTracing(Ray& ray) const {
     Color color = object->ka * aIntensity;
     for (Light* light: lightSources) {
         Vec lt = normalize(light->position - intersection);
+
+        Ray shadowRay(intersection, lt);
+        float s;
+        if (hit(s, shadowRay, 0.01)) return color;
+
         Vec h = normalize(v + lt);
         color += object->color * light->intensity * std::max(0.0, n.ddot(lt));
         color += object->ks * light->intensity * std::pow(std::max(0.0, n.ddot(h)), object->p);
@@ -94,4 +92,17 @@ Color World::rayTracing(Ray& ray) const {
 
 Vec World::normalize(Vec v) {
     return v/cv::norm(v);
+}
+
+Object *World::hit(float &t, Ray& ray, float epsilon) const {
+    t = INT_MAX;
+    Object* object = nullptr;
+    for (auto obj : objects) {
+        auto tt = obj->intersect(ray);
+        if (tt > epsilon && tt < t) {
+            t = tt;
+            object = obj;
+        }
+    }
+    return object;
 }
