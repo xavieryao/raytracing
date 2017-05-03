@@ -11,10 +11,10 @@ void World::addObject(Object *obj) {
     objects.push_back(obj);
 }
 
-void World::render(float l, float r, float b, float t, float d, int nx, int ny, cv::Vec3f eye, cv::Mat &mat) const {
-    auto uu = Vec(1, 0, 0);
-    auto vv = Vec(0, -1, 0);
-    auto ww = Vec(0, 0, -1);
+void World::render(float l, float r, float b, float t, float d, int nx, int ny, Camera& cam, cv::Mat &mat) const {
+    auto& uu = cam.u;
+    auto& vv = cam.v;
+    auto& ww = cam.w;
 
     for (int i = 0; i < ny; ++i) {
 //        printf("column %d\n", i);
@@ -25,7 +25,7 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
             auto u = l + (r - l) * (i + 0.5) / ny;
             auto v = b + (t - b) * (j + 0.5) / nx;
             auto direction = -d * ww + u * uu + v * vv;
-            auto ray = Ray(eye, direction);
+            auto ray = Ray(cam.eye, direction);
             mat.at<Color>(j, i) = rayTracing(ray);
         }
     }
@@ -36,17 +36,17 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
  * d: view depth
  * nx, ny: height and width
  */
-void World::render(float l, float r, float b, float t, float d, int nx, int ny, cv::Vec3f eye, bool ssaa) const {
+void World::render(float l, float r, float b, float t, float d, int nx, int ny, Camera& cam, bool ssaa) const {
     if (!ssaa) {
         auto image = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
-        render(l, r, b, t, d, nx, ny, eye, image);
+        render(l, r, b, t, d, nx, ny, cam, image);
         auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
         cv::imwrite(filename, image);
     } else {
         // super sampling
         auto sampledImage = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
         auto image = cv::Mat(nx * 2, ny * 2, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
-        render(l, r, b, t, d, nx * 2, ny * 2, eye, image);
+        render(l, r, b, t, d, nx * 2, ny * 2, cam, image);
 
         for (int i = 0; i < nx; ++i) {
             for (int j = 0; j < ny; ++j) {

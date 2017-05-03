@@ -63,9 +63,17 @@ int main() {
     w.addObject(top);
     w.addObject(back);
 
-    constexpr int size = 1024;
+    constexpr int size = 400;
     constexpr int frame = 50;
-    w.render(-frame, frame, -frame, frame, 5, size, size, Vec(0, -7, -1), true);
+
+    Camera cam(Vec(0, 0, -3));
+
+    for (int i = -15; i < 15; ++i) {
+        cam.yaw(0.3*i);
+        w.setName(std::to_string(i));
+        w.render(-frame, frame, -frame, frame, 5, size, size, cam, false);
+        cam.yaw(-0.3*i);
+    }
 
     return 0;
 }
