@@ -35,6 +35,7 @@ Sphere::Sphere(cv::Vec3f center, float radius, Material& mat) {
     this->material = mat;
     auto vec_r = cv::Vec3f(radius, radius, radius);
     this->aabb = AABB(center-vec_r, center+vec_r);
+    this->type = "sphere";
 }
 
 void Sphere::repr() const {

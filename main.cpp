@@ -7,7 +7,6 @@
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
-//    srand(static_cast<unsigned int>(13488523379));
     srand(static_cast<unsigned int>(3847524325));
 
     Material m1;
@@ -23,30 +22,40 @@ int main() {
         randMaterials[i] = Material::randomMaterial();
     }
 
-    Plane* ground = new Plane(Vec(0, 1, 0), 50, randMaterials[0], "ground");
+
+    randMaterials[0].km = 1;
+    randMaterials[0].color = Color(20, 20, 20);
+    randMaterials[0].ka = Color(20, 20, 20);
+    randMaterials[0].ks = Color(20, 20, 20);
+//    randMaterials[3].km = Color(150, 150, 150);
+//    randMaterials[2].km = Color(150, 150, 150);
+//    randMaterials[1].km = Color(150, 150, 150);
+//    randMaterials[4].km = Color(150, 150, 150);
+
+//    randMaterials[3].km = 0.6;
+
+    Plane* ground = new Plane(Vec(0, 1, 0), 20, randMaterials[0], "ground");
     Plane* left = new Plane(Vec(1, 0, 0), 50, randMaterials[1], "left");
     Plane* right = new Plane(Vec(-1, 0, 0), 50, randMaterials[2], "right");
-    Plane* top = new Plane(Vec(0, -1, 0), 50, randMaterials[3], "top");
-    Plane* back = new Plane(Vec(0, 0, -1), 20, randMaterials[4], "back");
+    Plane* top = new Plane(Vec(0, -1, 0), 20, randMaterials[3], "top");
+    Plane* back = new Plane(Vec(0, 0, -1), 10, randMaterials[4], "back");
 
     World w(Color(10, 10, 10), 0.2);
-    w.setName("ssaa");
+//    w.setName("ssaa");
     Light* light = new Light(cv::Vec3f(0, 10, 0));
     Light* light2 = new Light(cv::Vec3f(20, 10, 0));
     Light* light3 = new Light(cv::Vec3f(0, 0, 0), 1);
 
-    Sphere* sp = new Sphere(Vec(0, 0, 30), 25, m1);
-    Sphere* another_sp = new Sphere(Vec(0.1, 0.1, 1.5), 0.8, randMaterials[5]);
+    Sphere* sp = new Sphere(Vec(0, -15 ,4.8), 4.5, m1);
+    randMaterials[5].km = 0.3;
+//    Sphere* another_sp = new Sphere(Vec(0, -19, 1.0), 0.8, randMaterials[5]);
 
     w.addLightSource(light);
     w.addLightSource(light2);
     w.addLightSource(light3);
 
-//    w.addLightSource(new Light(cv::Vec3f(42, 42, 5), 0.8));
-//    w.addLightSource(new Light(cv::Vec3f(13, -9, 9), 0.7));
-
     w.addObject(sp);
-    w.addObject(another_sp);
+//    w.addObject(another_sp);
 
     w.addObject(ground);
     w.addObject(left);
@@ -54,7 +63,9 @@ int main() {
     w.addObject(top);
     w.addObject(back);
 
-    constexpr int size = 500;
-    w.render(-35, 35, -35, 35, 10, size, size, Vec(0, 0, 0), true);
+    constexpr int size = 1024;
+    constexpr int frame = 50;
+    w.render(-frame, frame, -frame, frame, 5, size, size, Vec(0, -7, -1), true);
+
     return 0;
 }

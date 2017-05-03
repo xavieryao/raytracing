@@ -7,7 +7,6 @@
 
 #define NDEBUG
 
-
 void World::addObject(Object *obj) {
     objects.push_back(obj);
 }
@@ -18,7 +17,7 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
     auto ww = Vec(0, 0, -1);
 
     for (int i = 0; i < ny; ++i) {
-        printf("column %d\n", i);
+//        printf("column %d\n", i);
         for (int j = 0; j < nx; ++j) {
 #ifndef NDEBUG
             printf("\n");
@@ -49,12 +48,9 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
         auto image = cv::Mat(nx * 2, ny * 2, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
         render(l, r, b, t, d, nx * 2, ny * 2, eye, image);
 
-        cv::imwrite("/Users/xavieryao/cg/rt/" + name + ".ss.png", image);
-
-
         for (int i = 0; i < nx; ++i) {
             for (int j = 0; j < ny; ++j) {
-                sampledImage.at<Color>(i, j) = supersample(i, j, nx, ny, image);
+                sampledImage.at<Color>(i, j) = superSample(i, j, nx, ny, image);
             }
         }
         auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
@@ -63,7 +59,7 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
 
 }
 
-Color World::supersample(int i, int j, int nx, int ny, cv::Mat &image) const {
+Color World::superSample(int i, int j, int nx, int ny, cv::Mat &image) const {
     #define VALID_IDX(x, y) (x > 0 && x < 2*nx && y > 0 && y < 2*nx)
     // 3*3 kernel
     Color mean = 0;
@@ -109,19 +105,21 @@ World::World(Color bgColor, float aIntensity, std::string name) {
     this->bgColor = bgColor;
 }
 
-Color World::rayTracing(Ray &ray) const {
+Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
 #ifndef NDEBUG
     printf("ray tracing: Ray origin: %.2f %.2f %.2f, Ray direction: %.2f %.2f %.2f \n",ray.origin[0], ray.origin[1],
            ray.origin[2], ray.direction[0], ray.direction[1], ray.direction[2]);
+    printf("depth: %d\n", depth);
 #endif
     float t;
-    Object *object = hit(t, ray);
+    Object *object = hit(t, ray, epsilon);
     if (object == nullptr) {
 #ifndef NDEBUG
         printf("no object hit.\n");
 #endif
         return bgColor;
     }
+
 
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
@@ -162,11 +160,19 @@ Color World::rayTracing(Ray &ray) const {
             color += object->material.color * light->intensity * std::max(0.0, a);
             color += object->material.ks * light->intensity * std::pow(std::max(0.0, b), object->material.p);
 
-        } else {
-#ifndef NDEBUG
-            printf("should be shadow\n");
-#endif
         }
+    }
+
+    /*
+     * ideal specular reflection
+     */
+    if (depth == 0) return color;
+    if (object->material.km != .0) {
+        Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
+        Ray mirrorRay(intersection, r);
+        Color rColor = rayTracing(mirrorRay, depth-1, 0.01);
+        color += object->material.km*rColor;
+//        color += 0.6*rColor;
     }
     return color;
 }
@@ -197,6 +203,3 @@ Object *World::hit(float &t, Ray &ray, float epsilon, double max) const {
 void World::printVec(Vec &v) {
     printf("(%.2f %.2f %.2f)\n", v[0], v[1], v[2]);
 }
-
-
-
