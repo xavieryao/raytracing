@@ -24,9 +24,11 @@ private:
     float aIntensity;
 
     Color rayTracing(Ray& ray) const;
-    Object* hit(float& t, Ray& ray, float epsilon = .0) const;
+    Object* hit(float& t, Ray& ray, float epsilon = .0, double max = INT_MAX) const;
     static Vec normalize(Vec v);
     static void printVec(Vec& v);
+    void render(float l, float r, float b, float t, float d, int nx, int ny, cv::Vec3f eye, cv::Mat& mat) const;
+    Color supersample(int i, int j, int nx, int ny, cv::Mat& image) const;
 
 public:
     World(Color bgColor = Color(255,255,255), float aIntensity = 0, std::string name="Brave New World");
@@ -35,7 +37,7 @@ public:
     void addObject(Object* obj);
     void addLightSource(Light* l);
     void render(float l, float r, float b, float t, float d, int nx = 512, int ny = 512,
-                cv::Vec3f eye = cv::Vec3f(0, 0, 0)) const;
+                cv::Vec3f eye = cv::Vec3f(0, 0, 0), bool ssaa=false) const;
     ~World();
 };
 

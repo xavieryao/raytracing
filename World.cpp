@@ -5,20 +5,14 @@
 #include "World.h"
 #include "tqdm/tqdm.h"
 
+#define NDEBUG
 
-void World::addObject(Object* obj) {
+
+void World::addObject(Object *obj) {
     objects.push_back(obj);
 }
 
-/*
- * l,r,b,t: describes view (how broad you can see)
- * d: view depth
- * nx, ny: height and width
- */
-void World::render(float l, float r, float b, float t, float d, int nx, int ny, cv::Vec3f eye) const {
-    auto image = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
-
-    std::cout << "render" << std::endl;
+void World::render(float l, float r, float b, float t, float d, int nx, int ny, cv::Vec3f eye, cv::Mat &mat) const {
     auto uu = Vec(1, 0, 0);
     auto vv = Vec(0, -1, 0);
     auto ww = Vec(0, 0, -1);
@@ -26,22 +20,69 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
     for (int i = 0; i < ny; ++i) {
         printf("column %d\n", i);
         for (int j = 0; j < nx; ++j) {
+#ifndef NDEBUG
             printf("\n");
-
+#endif
             auto u = l + (r - l) * (i + 0.5) / ny;
             auto v = b + (t - b) * (j + 0.5) / nx;
-            auto direction = -d*ww+u*uu+v*vv;
+            auto direction = -d * ww + u * uu + v * vv;
             auto ray = Ray(eye, direction);
-            image.at<Color>(j, i) = rayTracing(ray);
+            mat.at<Color>(j, i) = rayTracing(ray);
         }
     }
-//    cv::imshow(name, image);
-//    cv::waitKey();
-    auto filename = "/Users/xavieryao/cg/rt/"+name+".png";
-    cv::imwrite(filename, image);
 }
 
-void World::addLightSource(Light* l) {
+/*
+ * l,r,b,t: describes view (how broad you can see)
+ * d: view depth
+ * nx, ny: height and width
+ */
+void World::render(float l, float r, float b, float t, float d, int nx, int ny, cv::Vec3f eye, bool ssaa) const {
+    if (!ssaa) {
+        auto image = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
+        render(l, r, b, t, d, nx, ny, eye, image);
+        auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
+        cv::imwrite(filename, image);
+    } else {
+        // super sampling
+        auto sampledImage = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
+        auto image = cv::Mat(nx * 2, ny * 2, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
+        render(l, r, b, t, d, nx * 2, ny * 2, eye, image);
+
+        cv::imwrite("/Users/xavieryao/cg/rt/" + name + ".ss.png", image);
+
+
+        for (int i = 0; i < nx; ++i) {
+            for (int j = 0; j < ny; ++j) {
+                sampledImage.at<Color>(i, j) = supersample(i, j, nx, ny, image);
+            }
+        }
+        auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
+        cv::imwrite(filename, sampledImage);
+    }
+
+}
+
+Color World::supersample(int i, int j, int nx, int ny, cv::Mat &image) const {
+    #define VALID_IDX(x, y) (x > 0 && x < 2*nx && y > 0 && y < 2*nx)
+    // 3*3 kernel
+    Color mean = 0;
+    int dxs[] = {-1, 0, 1};
+    int dys[] = {-1, 0, 1};
+    float weights[] = {1, 2, 1, 2, 4, 2, 1, 2, 1};
+    int pixels = 16;
+    int k = 0;
+    for (auto dx : dxs) {
+        for (auto dy: dys) {
+            mean += VALID_IDX(2 * i + dx, 2 * j + dy) ? image.at<Color>(2 *i +dx, 2 * j + dy) * (weights[k]/pixels) :
+                    image.at<Color>(2 * i, 2 * j) * (weights[k]/pixels);
+            k++;
+        }
+    }
+    return mean;
+}
+
+void World::addLightSource(Light *l) {
     lightSources.push_back(l);
 }
 
@@ -68,13 +109,13 @@ World::World(Color bgColor, float aIntensity, std::string name) {
     this->bgColor = bgColor;
 }
 
-Color World::rayTracing(Ray& ray) const {
+Color World::rayTracing(Ray &ray) const {
 #ifndef NDEBUG
     printf("ray tracing: Ray origin: %.2f %.2f %.2f, Ray direction: %.2f %.2f %.2f \n",ray.origin[0], ray.origin[1],
            ray.origin[2], ray.direction[0], ray.direction[1], ray.direction[2]);
 #endif
     float t;
-    Object* object = hit(t, ray);
+    Object *object = hit(t, ray);
     if (object == nullptr) {
 #ifndef NDEBUG
         printf("no object hit.\n");
@@ -82,7 +123,7 @@ Color World::rayTracing(Ray& ray) const {
         return bgColor;
     }
 
-    Vec intersection = ray.origin + t*ray.direction;
+    Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
 
@@ -96,9 +137,11 @@ Color World::rayTracing(Ray& ray) const {
 #endif
 
     Color color = object->material.ka * aIntensity;
-    for (Light* light: lightSources) {
+    for (Light *light: lightSources) {
 
-        Vec lt = normalize(light->position - intersection);
+        Vec lt = light->position - intersection;
+        double max = cv::norm(lt);
+        lt = normalize(lt);
         Ray shadowRay(intersection, lt);
 
 #ifndef NDEBUG
@@ -108,7 +151,7 @@ Color World::rayTracing(Ray& ray) const {
 #endif
 
         float s;
-        if (!hit(s, shadowRay, 0.01)) {
+        if (!hit(s, shadowRay, 0.01, max)) {
             Vec h = normalize(v + lt);
             double a = n.ddot(lt);
             double b = n.ddot(h);
@@ -129,26 +172,31 @@ Color World::rayTracing(Ray& ray) const {
 }
 
 Vec World::normalize(Vec v) {
-    return v/cv::norm(v);
+    return v / cv::norm(v);
 }
 
-Object *World::hit(float &t, Ray& ray, float epsilon) const {
+Object *World::hit(float &t, Ray &ray, float epsilon, double max) const {
     t = INT_MAX;
-    Object* object = nullptr;
+    Object *object = nullptr;
     for (auto obj : objects) {
         auto tt = obj->intersect(ray);
-        if (tt > epsilon && tt < t) {
+        if (tt > epsilon && tt < t && tt < max) {
             t = tt;
             object = obj;
         }
     }
+#ifndef NDEBUG
     if (object) {
         printf("hit ");
         object->repr();
     }
+#endif
     return object;
 }
 
 void World::printVec(Vec &v) {
     printf("(%.2f %.2f %.2f)\n", v[0], v[1], v[2]);
 }
+
+
+

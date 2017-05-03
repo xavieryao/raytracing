@@ -62,6 +62,7 @@ public:
     Material material;
     AABB aabb;
     std::string type = "Object";
+    std::string name = "Untitled";
 
     virtual ~Object() {};
     virtual float intersect(Ray ray) const = 0;
@@ -88,7 +89,7 @@ private:
     float d;
 
 public:
-    Plane(cv::Vec3f n, float d, Material& m);
+    Plane(cv::Vec3f n, float d, Material& m, std::string name="Untitled");
     float intersect(Ray ray) const override;
     void repr() const override;
     cv::Vec3f normalVector(cv::Vec3f point) const override;

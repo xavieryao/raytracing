@@ -51,15 +51,16 @@ float Plane::intersect(Ray ray) const {
     return t;
 }
 
-Plane::Plane(cv::Vec3f n, float d, Material& m) {
+Plane::Plane(cv::Vec3f n, float d, Material& m, std::string name) {
     this->type = "Plane";
     this->n = n/cv::norm(n);
     this->d = d;
     this->material = m;
+    this->name = name;
 }
 
 void Plane::repr() const {
-    printf("N: (%.2f, %.2f, %.2f) D: %f\n", n[0], n[1], n[2], d);
+    printf("%s N: (%.2f, %.2f, %.2f) D: %f \n", name.c_str(), n[0], n[1], n[2], d);
 }
 
 cv::Vec3f Plane::normalVector(cv::Vec3f point) const {
