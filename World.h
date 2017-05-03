@@ -26,6 +26,7 @@ private:
     Color rayTracing(Ray& ray) const;
     Object* hit(float& t, Ray& ray, float epsilon = .0) const;
     static Vec normalize(Vec v);
+    static void printVec(Vec& v);
 
 public:
     World(Color bgColor = Color(255,255,255), float aIntensity = 0, std::string name="Brave New World");

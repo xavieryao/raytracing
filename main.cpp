@@ -7,7 +7,7 @@
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
-    srand((unsigned int) time(0));
+    srand(static_cast<unsigned int>(13488523379));
 
     Material m1, m2, m3;
     m1.color = Color(100, 123, 5);
@@ -25,27 +25,41 @@ int main() {
     m3.ka = Color(255, 255, 255);
     m3.p = 10;
 
-    Material m4 = Material::randomMaterial();
+    Material randMaterials[10];
+    for (int i = 0; i < 10; ++i) {
+        randMaterials[i] = Material::randomMaterial();
+    }
 
-    Plane* ground = new Plane(Vec(0, 1, 0), -50, m3);
-    Plane* left = new Plane(Vec(1, 0, 0), -50, m3);
-    Plane* right = new Plane(Vec(-1, 0, 0), 50, m3);
-    Plane* top = new Plane(Vec(0, -1, 0), 50, m3);
+    randMaterials[0].color = Vec(255, 0, 0);
+    randMaterials[0].ka = randMaterials[0].color*0.9;
 
-    World w(Color(59, 66, 131), 0.8);
-    Light* light = new Light(cv::Vec3f(10, 0, 0));
-    Sphere* sp = new Sphere(Vec(0, 0, 20), 10, m4);
+    randMaterials[1].color = Vec(0, 255, 0);
+    randMaterials[1].ka = randMaterials[1].color*0.9;
+
+    Plane* ground = new Plane(Vec(0, 1, 0), 50, randMaterials[0]);
+    Plane* left = new Plane(Vec(1, 0, 0), 50, randMaterials[1]);
+    Plane* right = new Plane(Vec(-1, 0, 0), 50, randMaterials[2]);
+    Plane* top = new Plane(Vec(0, -1, 0), 50, randMaterials[3]);
+    Plane* back = new Plane(Vec(0, 0, -1), 50, randMaterials[1]);
+
+    World w(Color(10, 10, 10), 0.2);
+    Light* light = new Light(cv::Vec3f(0, 0, 0));
+    Sphere* sp = new Sphere(Vec(0, 0, 20), 15, m1);
     Sphere* another_sp = new Sphere(Vec(9, 13, 40), 25, m2);
 
     w.addLightSource(light);
-    w.addLightSource(new Light(Vec(-42, 42, 3), 0.8));
-    w.addLightSource(new Light(Vec(-10, 0, 0), 0.8));
+//    w.addLightSource(new Light(Vec(-42, 42, 3), 0.8));
+//    w.addLightSource(new Light(Vec(-0, 0, 0), 1.0));
 
-    w.addObject(sp);
-//    w.addObject(another_sp);
-//    w.addObject(ground);
+//    w.addObject(sp);
 
-    constexpr int size = 1000;
-    w.render(-15, 15, -15, 15, 3, size, size, Vec(0, 0, 0));
+    w.addObject(ground);
+//    w.addObject(left);
+//    w.addObject(right);
+//    w.addObject(top);
+    w.addObject(back);
+
+    constexpr int size = 10;
+    w.render(-35, 35, -35, 35, 3, size, size, Vec(0, 0, 0));
     return 0;
 }
