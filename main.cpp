@@ -2,10 +2,12 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 
+
 #include "World.h"
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
+    srand((unsigned int) time(0));
 
     Material m1, m2, m3;
     m1.color = Color(100, 123, 5);
@@ -23,11 +25,16 @@ int main() {
     m3.ka = Color(255, 255, 255);
     m3.p = 10;
 
-    Plane* ground = new Plane(Vec(0, 0, 1), -50, m3);
+    Material m4 = Material::randomMaterial();
+
+    Plane* ground = new Plane(Vec(0, 1, 0), -50, m3);
+    Plane* left = new Plane(Vec(1, 0, 0), -50, m3);
+    Plane* right = new Plane(Vec(-1, 0, 0), 50, m3);
+    Plane* top = new Plane(Vec(0, -1, 0), 50, m3);
 
     World w(Color(59, 66, 131), 0.8);
     Light* light = new Light(cv::Vec3f(10, 0, 0));
-    Sphere* sp = new Sphere(Vec(0, 0, 20), 10, m1);
+    Sphere* sp = new Sphere(Vec(0, 0, 20), 10, m4);
     Sphere* another_sp = new Sphere(Vec(9, 13, 40), 25, m2);
 
     w.addLightSource(light);
@@ -35,7 +42,7 @@ int main() {
     w.addLightSource(new Light(Vec(-10, 0, 0), 0.8));
 
     w.addObject(sp);
-    w.addObject(another_sp);
+//    w.addObject(another_sp);
 //    w.addObject(ground);
 
     constexpr int size = 1000;

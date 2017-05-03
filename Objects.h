@@ -86,7 +86,6 @@ class Plane : public Object {
 private:
     cv::Vec3f n;
     float d;
-    std::string type = "Plane";
 
 public:
     Plane(cv::Vec3f n, float d, Material& m);

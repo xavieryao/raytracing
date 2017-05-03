@@ -52,6 +52,7 @@ float Plane::intersect(Ray ray) const {
 }
 
 Plane::Plane(cv::Vec3f n, float d, Material& m) {
+    this->type = "Plane";
     this->n = n/cv::norm(n);
     this->d = d;
     this->material = m;

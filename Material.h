@@ -6,6 +6,7 @@
 #define RAYTRACING_MATERIAL_H
 
 #include "Ray.h"
+#include <cstdlib>
 
 struct Material {
     cv::Vec3b color; /* kd: diffuse coefficient, or the surface color */
@@ -20,6 +21,21 @@ struct Material {
         this->ks = ks;
         this->ka = ka;
         this->p = p;
+    }
+
+    static Material randomMaterial() {
+        cv::Vec3b color, ks, ka;
+        for (int i = 0; i < 3; ++i) {
+            color[i] = static_cast<unsigned char>(rand()%256);
+        }
+        for (int i = 0; i < 3; ++i) {
+            ks[i] = static_cast<unsigned char>(rand()%256);
+        }
+        for (int i = 0; i < 3; ++i) {
+            ka[i] = static_cast<unsigned char>(rand()%256);
+        }
+        Material m(color, ks, ka, rand()%150);
+        return m;
     }
 };
 
