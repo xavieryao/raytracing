@@ -22,6 +22,26 @@ struct Camera {
                       u[1],
                       (float) (sin(rad) * u[0] + cos(rad) * u[2]));
     }
+
+    void pitch(double deg) {
+        auto rad = deg/180*M_PI;
+        w = cv::Vec3f(w[0],
+                      (float) (cos(rad) * w[1] - sin(rad) * w[2]),
+                      (float) (sin(rad) * w[1] + cos(rad) * w[2]));
+        v = cv::Vec3f(v[0],
+                      (float) (cos(rad) * v[1] - sin(rad) * v[2]),
+                      (float) (sin(rad) * v[1] + cos(rad) * v[2]));
+    }
+
+    void roll(double deg) {
+        auto rad = deg/180*M_PI;
+        u = cv::Vec3f((float) (cos(rad) * u[0] - sin(rad) * u[1]),
+                      (float) (sin(rad) * u[0] + cos(rad) * u[1]),
+                      u[2]);
+        v = cv::Vec3f((float) (cos(rad) * v[0] - sin(rad) * v[1]),
+                      (float) (sin(rad) * v[0] + cos(rad) * v[1]),
+                      v[2]);
+    }
 };
 
 #endif //RAYTRACING_CAMERA_H
