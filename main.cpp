@@ -27,7 +27,7 @@ int main() {
 
 //    randMaterials[1].km = 0.4;
 
-    Plane* ground = new Plane(Vec(0, 1, 0), 20, randMaterials[0], "ground");
+    Plane* ground = new Plane(Vec(0, 1, 0), 15, randMaterials[0], "ground");
     Plane* left = new Plane(Vec(1, 0, 0), 50, randMaterials[1], "left");
     Plane* right = new Plane(Vec(-1, 0, 0), 50, randMaterials[2], "right");
     Plane* top = new Plane(Vec(0, -1, 0), 20, randMaterials[3], "top");
@@ -37,20 +37,20 @@ int main() {
 //    w.setName("ssaa");
     Light* light = new Light(cv::Vec3f(0, 10, -2));
     Light* light2 = new Light(cv::Vec3f(12, 10, -2));
-    Light* light3 = new Light(cv::Vec3f(0, 0, -2), 1);
-    Light* light4 = new Light(cv::Vec3f(-3, -3, -2));
+    Light* light3 = new Light(cv::Vec3f(0, 0, -2), 0.5);
+//    Light* light4 = new Light(cv::Vec3f(-3, -3, -2));
 
     Sphere* sp = new Sphere(Vec(0, -7 , 3.8), 3.5, m1);
     randMaterials[5].km = 0.3;
-//    Sphere* another_sp = new Sphere(Vec(0, -19, 1.0), 0.8, randMaterials[5]);
+    Sphere* another_sp = new Sphere(Vec(0, -10, 1.0), 0.8, randMaterials[5]);
 
     w.addLightSource(light);
     w.addLightSource(light2);
     w.addLightSource(light3);
-    w.addLightSource(light4);
+//    w.addLightSource(light4);
 
     w.addObject(sp);
-//    w.addObject(another_sp);
+    w.addObject(another_sp);
 
     w.addObject(ground);
     w.addObject(left);
@@ -67,9 +67,10 @@ int main() {
     for (int i = -15; i < 15; ++i) {
         cam.pitch(0.3*i);
         w.setName(std::to_string(i+15));
-        w.render(-frame, frame, -frame, frame, 7, size, size, cam, false);
+        w.render(-frame, frame, -frame, frame, 9, size, size, cam, false);
         cam.pitch(-0.3*i);
     }
-
+//
+//    w.render(-frame, frame, -frame, frame, 7, size, size, cam, false);
     return 0;
 }

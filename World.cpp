@@ -5,8 +5,6 @@
 #include "World.h"
 #include "tqdm/tqdm.h"
 
-#define NDEBUG
-
 void World::addObject(Object *obj) {
     objects.push_back(obj);
 }
@@ -19,9 +17,6 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
     for (int i = 0; i < ny; ++i) {
 //        printf("column %d\n", i);
         for (int j = 0; j < nx; ++j) {
-#ifndef NDEBUG
-            printf("\n");
-#endif
             auto u = l + (r - l) * (i + 0.5) / ny;
             auto v = b + (t - b) * (j + 0.5) / nx;
             auto direction = -d * ww + u * uu + v * vv;
@@ -106,17 +101,9 @@ World::World(Color bgColor, float aIntensity, std::string name) {
 }
 
 Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
-#ifndef NDEBUG
-    printf("ray tracing: Ray origin: %.2f %.2f %.2f, Ray direction: %.2f %.2f %.2f \n",ray.origin[0], ray.origin[1],
-           ray.origin[2], ray.direction[0], ray.direction[1], ray.direction[2]);
-    printf("depth: %d\n", depth);
-#endif
     float t;
     Object *object = hit(t, ray, epsilon);
     if (object == nullptr) {
-#ifndef NDEBUG
-        printf("no object hit.\n");
-#endif
         return bgColor;
     }
 
@@ -124,15 +111,6 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
-
-#ifndef NDEBUG
-    printf("intersection: ");
-    printVec(intersection);
-    printf("n: ");
-    printVec(n);
-    printf("v: ");
-    printVec(v);
-#endif
 
     Color color = object->material.ka * aIntensity;
     for (Light *light: lightSources) {
@@ -142,21 +120,11 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
         lt = normalize(lt);
         Ray shadowRay(intersection, lt);
 
-#ifndef NDEBUG
-        printf("for light ");
-        light->repr();
-        printf("lt: "); printVec(lt);
-#endif
-
         float s;
         if (!hit(s, shadowRay, 0.01, max)) {
             Vec h = normalize(v + lt);
             double a = n.ddot(lt);
             double b = n.ddot(h);
-#ifndef NDEBUG
-            printf("h: "); printVec(h);
-            printf("color coefficient: %.2f  Ks coefficient %.2f\n", a, b);
-#endif
             color += object->material.color * light->intensity * std::max(0.0, a);
             color += object->material.ks * light->intensity * std::pow(std::max(0.0, b), object->material.p);
 
@@ -191,12 +159,7 @@ Object *World::hit(float &t, Ray &ray, float epsilon, double max) const {
             object = obj;
         }
     }
-#ifndef NDEBUG
-    if (object) {
-        printf("hit ");
-        object->repr();
-    }
-#endif
+
     return object;
 }
 

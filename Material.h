@@ -14,6 +14,8 @@ struct Material {
     cv::Vec3b ka; /* ka: the surface's ambient coefficient, or the ambient color. */
     float km; /* km: mirror coefficient */
     int p; /* Phong exponent */
+    bool dielectric;
+    float ar, ag, ab; /* RGB refraction factor */
 
     Material() : ks(cv::Vec3b(255, 255, 255)), p(100) {}
 
@@ -23,6 +25,7 @@ struct Material {
         this->ka = ka;
         this->p = p;
         this->km = km;
+        this->dielectric = false;
     }
 
     static Material randomMaterial() {
