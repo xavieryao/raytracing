@@ -76,7 +76,7 @@ private:
     float radius;
 
 public:
-    Sphere(cv::Vec3f center, float radius, Material& mat);
+    Sphere(cv::Vec3f center, float radius, Material& mat, std::string name="Untitled");
     float intersect(Ray ray) const override;
     void repr() const override;
     cv::Vec3f normalVector(cv::Vec3f point) const override;

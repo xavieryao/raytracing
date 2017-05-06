@@ -24,15 +24,14 @@ float Sphere::intersect(Ray ray) const {
     float sqrt_delta = std::sqrt(delta);
     float t1 = static_cast<float>((-d.ddot(ec)+sqrt_delta)/dd);
     float t2 = static_cast<float>((-d.ddot(ec)-sqrt_delta)/dd);
-    float t = std::min(t1, t2);
-    if (t < 0) return NO_INTERSECTION;
-    return t;
+    return t2 < 0 ? t1 : t2;
 }
 
-Sphere::Sphere(cv::Vec3f center, float radius, Material& mat) {
+Sphere::Sphere(cv::Vec3f center, float radius, Material& mat, std::string name) {
     this->center = center;
     this->radius = radius;
     this->material = mat;
+    this->name = name;
     auto vec_r = cv::Vec3f(radius, radius, radius);
     this->aabb = AABB(center-vec_r, center+vec_r);
     this->type = "sphere";

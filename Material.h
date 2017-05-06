@@ -16,6 +16,7 @@ struct Material {
     int p; /* Phong exponent */
     bool dielectric;
     float ar, ag, ab; /* RGB refraction factor */
+    float nt; /* refractive index */
 
     Material() : ks(cv::Vec3b(255, 255, 255)), p(100) {}
 

@@ -24,10 +24,12 @@ private:
     Color bgColor;
     float aIntensity;
 
-    Color rayTracing(Ray& ray, int depth=3, float epsilon = .0) const;
+    Color rayTracing(Ray& ray, int depth=5, float epsilon = .0) const;
     Object* hit(float& t, Ray& ray, float epsilon = .0, double max = INT_MAX) const;
     static Vec normalize(Vec v);
     static void printVec(Vec& v);
+    static void printColor(Color& c);
+    bool refract(Vec& d, Vec&n, float nt, Vec& t) const;
     void render(float l, float r, float b, float t, float d, int nx, int ny, Camera& cam, cv::Mat& mat) const;
     Color superSample(int i, int j, int nx, int ny, cv::Mat &image) const;
 

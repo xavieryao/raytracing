@@ -104,13 +104,74 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
     float t;
     Object *object = hit(t, ray, epsilon);
     if (object == nullptr) {
+        printf("bgColor");
         return bgColor;
     }
-
 
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
+    Vec d = normalize(ray.direction);
+
+    /*
+    * Refraction
+    */
+    if (object->material.dielectric) {
+        if (depth == 0) {
+            printf("depth = 0\n");
+            return Color(0, 0, 0);
+        }
+
+        double kr, kg, kb;
+        Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
+        Ray reflectRay(intersection, r);
+        Vec tt;
+        double c = 0;
+
+        if (d.ddot(n) < 0) {
+            refract(d, n, object->material.nt, tt);
+            c = -d.ddot(n);
+            kr = 1; kg = 1; kb = 1;
+        } else {
+            kr = exp(-object->material.ar*t);
+            kg = exp(-object->material.ag*t);
+            kb = exp(-object->material.ab*t);
+            auto neg_n = -n;
+            if (refract(d, neg_n, 1/object->material.nt, tt)) {
+                c = tt.ddot(n);
+            } else {
+                Color color = rayTracing(reflectRay, depth-1, 0.1);
+                color[0] *= kb;
+                color[1] *= kg;
+                color[2] *= kr;
+                return color;
+            }
+        }
+        Ray refractRay(intersection, tt);
+        auto R0 = pow((object->material.nt-1)/(object->material.nt+1), 2);
+        auto R = R0 + (1-R0)*pow(1-c, 5);
+
+        assert(R >= 0 && R <= 1);
+
+        Color reflectColor = rayTracing(reflectRay, depth-1, 0.1);
+        Color refractColor = rayTracing(refractRay, depth-1, 0.1);
+
+        printf("reflectColor:");printColor(reflectColor);
+        printf("refractColor:");printColor(refractColor);
+
+        Color color = R*reflectColor + (1-R)*refractColor;
+
+        printf("kb %.2f kg %.2f kr %.2f   before color: ", kb, kg, kr);
+        printColor(color);
+        color[0] *= kb;
+        color[1] *= kg;
+        color[2] *= kr;
+        printf("after color: ");
+        printColor(color);
+        printf("\n");
+        return color;
+    }
+
 
     Color color = object->material.ka * aIntensity;
     for (Light *light: lightSources) {
@@ -127,20 +188,20 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
             double b = n.ddot(h);
             color += object->material.color * light->intensity * std::max(0.0, a);
             color += object->material.ks * light->intensity * std::pow(std::max(0.0, b), object->material.p);
-
         }
     }
 
     /*
      * ideal specular reflection
      */
-    if (depth == 0) return color;
+    if (depth == 0) {
+        return color;
+    }
     if (object->material.km != .0) {
         Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
         Ray mirrorRay(intersection, r);
         Color rColor = rayTracing(mirrorRay, depth-1, 0.01);
         color += object->material.km*rColor;
-//        color += 0.6*rColor;
     }
     return color;
 }
@@ -165,4 +226,18 @@ Object *World::hit(float &t, Ray &ray, float epsilon, double max) const {
 
 void World::printVec(Vec &v) {
     printf("(%.2f %.2f %.2f)\n", v[0], v[1], v[2]);
+}
+
+bool World::refract(Vec &d, Vec &n, float nt, Vec &t) const {
+    /*
+     * assuming the refractive index of the environment is 1.
+     */
+    double a = std::sqrt(1- (1-std::pow(d.ddot(n), 2)/std::pow(nt, 2)));
+    if (a < 0) return false;
+    t = d-n*d.ddot(n)/nt - n*sqrt(a);
+    return true;
+}
+
+void World::printColor(Color &c) {
+    printf("(%d %d %d)\n", c[0], c[1], c[2]);
 }
