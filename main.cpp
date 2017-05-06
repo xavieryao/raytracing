@@ -15,10 +15,10 @@ int main() {
     m1.ka = 0.9*m1.color;
     m1.p = 100;
     m1.dielectric = true;
-    m1.ab = 0.8;
-    m1.ag = 0.8;
-    m1.ar = 0.8;
-    m1.nt = 1.3;
+    m1.ab = 0.08;
+    m1.ag = 0.08;
+    m1.ar = 0.08;
+    m1.nt = 1.2;
 
     Material randMaterials[10];
     for (int i = 0; i < 10; ++i) {
@@ -64,19 +64,11 @@ int main() {
     w.addObject(top);
     w.addObject(back);
 
-    constexpr int size = 300;
+    constexpr int size = 100;
     constexpr int frame = 50;
 
-    Camera cam(Vec(0, -5, -0.5));
+    Camera cam(Vec(0, -5, -0.5f));
     w.render(-frame, frame, -frame, frame, 9, size, size, cam, false);
 
-
-//    for (int i = -15; i < 15; ++i) {
-//        cam.pitch(0.3*i);
-//        w.setName(std::to_string(i+15));
-//        cam.pitch(-0.3*i);
-//    }
-//
-//    w.render(-frame, frame, -frame, frame, 7, size, size, cam, false);
     return 0;
 }

@@ -55,7 +55,7 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
 }
 
 Color World::superSample(int i, int j, int nx, int ny, cv::Mat &image) const {
-    #define VALID_IDX(x, y) (x > 0 && x < 2*nx && y > 0 && y < 2*nx)
+    #define VALID_IDX(x, y) (x > 0 && x < 2*nx && y > 0 && y < 2*ny)
     // 3*3 kernel
     Color mean = 0;
     int dxs[] = {-1, 0, 1};
@@ -111,7 +111,7 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
-    Vec d = normalize(ray.direction);
+    Vec d = ray.direction;
 
     /*
     * Refraction
@@ -123,27 +123,35 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
         }
 
         double kr, kg, kb;
-        Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
+        Vec r = d - 2*(n.ddot(d))*n;
         Ray reflectRay(intersection, r);
         Vec tt;
         double c = 0;
 
-        if (d.ddot(n) < 0) {
+        constexpr float _ep = 0.01;
+
+        if (d.ddot(n) < 0) { /* in */
+            printf("in\n");
             refract(d, n, object->material.nt, tt);
             c = -d.ddot(n);
             kr = 1; kg = 1; kb = 1;
-        } else {
-            kr = exp(-object->material.ar*t);
-            kg = exp(-object->material.ag*t);
-            kb = exp(-object->material.ab*t);
+        } else { /* out */
+            printf("out\n");
+
+            kr = exp(-object->material.ar*std::abs(t));
+            kg = exp(-object->material.ag*std::abs(t));
+            kb = exp(-object->material.ab*std::abs(t));
             auto neg_n = -n;
+
             if (refract(d, neg_n, 1/object->material.nt, tt)) {
                 c = tt.ddot(n);
             } else {
-                Color color = rayTracing(reflectRay, depth-1, 0.1);
+                Color color = rayTracing(reflectRay, depth-1, _ep);
                 color[0] *= kb;
                 color[1] *= kg;
                 color[2] *= kr;
+                printf("full refraction: "); printColor(color);
+                printf("\n");
                 return color;
             }
         }
@@ -153,8 +161,8 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
 
         assert(R >= 0 && R <= 1);
 
-        Color reflectColor = rayTracing(reflectRay, depth-1, 0.1);
-        Color refractColor = rayTracing(refractRay, depth-1, 0.1);
+        Color reflectColor = rayTracing(reflectRay, depth-1, _ep);
+        Color refractColor = rayTracing(refractRay, depth-1, _ep);
 
         printf("reflectColor:");printColor(reflectColor);
         printf("refractColor:");printColor(refractColor);
@@ -232,9 +240,12 @@ bool World::refract(Vec &d, Vec &n, float nt, Vec &t) const {
     /*
      * assuming the refractive index of the environment is 1.
      */
-    double a = std::sqrt(1- (1-std::pow(d.ddot(n), 2)/std::pow(nt, 2)));
-    if (a < 0) return false;
-    t = d-n*d.ddot(n)/nt - n*sqrt(a);
+
+    double a = 1- (1- std::pow(d.ddot(n), 2))/std::pow(nt, 2);
+    if (a < 0) {
+        return false;
+    }
+    t = (d-n*d.ddot(n))/nt - n*sqrt(a);
     return true;
 }
 

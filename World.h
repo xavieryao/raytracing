@@ -24,7 +24,7 @@ private:
     Color bgColor;
     float aIntensity;
 
-    Color rayTracing(Ray& ray, int depth=5, float epsilon = .0) const;
+    Color rayTracing(Ray& ray, int depth=7, float epsilon = .0) const;
     Object* hit(float& t, Ray& ray, float epsilon = .0, double max = INT_MAX) const;
     static Vec normalize(Vec v);
     static void printVec(Vec& v);

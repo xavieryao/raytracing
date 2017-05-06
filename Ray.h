@@ -15,7 +15,7 @@ struct Ray {
 
     Ray(cv::Vec3f origin, cv::Vec3f direction) {
         this->origin = origin;
-        this->direction = direction;
+        this->direction = direction/cv::norm(direction);
         for (int i = 0; i < 3; i++) {
             invDir[i] = 1/direction[i];
             sign[i] = invDir[i] < 0;
