@@ -4,9 +4,9 @@
 
 #include "Objects.h"
 
-float Object::NO_INTERSECTION = -3.0f;
+double Object::NO_INTERSECTION = -3.0f;
 
-float Sphere::intersect(Ray ray) const {
+double Sphere::intersect(Ray ray) const {
     if (! aabb.intersect(ray)) {
         return NO_INTERSECTION;
     }
@@ -16,23 +16,23 @@ float Sphere::intersect(Ray ray) const {
     auto& c = center;
     auto ec = e-c;
     auto dd = d.ddot(d);
-    float delta = static_cast<float>(std::pow(d.ddot(ec), 2) - dd*(ec.ddot(ec) - std::pow(radius, 2)));
+    double delta = static_cast<double>(std::pow(d.ddot(ec), 2) - dd*(ec.ddot(ec) - std::pow(radius, 2)));
     if (delta < 0) {
         return Object::NO_INTERSECTION;
     }
 
-    float sqrt_delta = std::sqrt(delta);
-    float t1 = static_cast<float>((-d.ddot(ec)+sqrt_delta)/dd);
-    float t2 = static_cast<float>((-d.ddot(ec)-sqrt_delta)/dd);
+    double sqrt_delta = std::sqrt(delta);
+    double t1 = static_cast<double>((-d.ddot(ec)+sqrt_delta)/dd);
+    double t2 = static_cast<double>((-d.ddot(ec)-sqrt_delta)/dd);
     return t2 < 0 ? t1 : t2;
 }
 
-Sphere::Sphere(cv::Vec3f center, float radius, Material& mat, std::string name) {
+Sphere::Sphere(cv::Vec3d center, double radius, Material& mat, std::string name) {
     this->center = center;
     this->radius = radius;
     this->material = mat;
     this->name = name;
-    auto vec_r = cv::Vec3f(radius, radius, radius);
+    auto vec_r = cv::Vec3d(radius, radius, radius);
     this->aabb = AABB(center-vec_r, center+vec_r);
     this->type = "sphere";
 }
@@ -41,17 +41,17 @@ void Sphere::repr() const {
     printf("(%.2f, %.2f, %.2f) R=%.2f\n", center[0], center[1], center[2], radius);
 }
 
-cv::Vec3f Sphere::normalVector(cv::Vec3f point) const {
+cv::Vec3d Sphere::normalVector(cv::Vec3d point) const {
     auto vec = point-center;
     return vec/cv::norm(vec);
 }
 
-float Plane::intersect(Ray ray) const {
-    float t = -static_cast<float>((d + n.ddot(ray.origin))/(n.ddot(ray.direction)));
+double Plane::intersect(Ray ray) const {
+    double t = -static_cast<double>((d + n.ddot(ray.origin))/(n.ddot(ray.direction)));
     return t;
 }
 
-Plane::Plane(cv::Vec3f n, float d, Material& m, std::string name) {
+Plane::Plane(cv::Vec3d n, double d, Material& m, std::string name) {
     this->type = "Plane";
     this->n = n/cv::norm(n);
     this->d = d;
@@ -63,6 +63,6 @@ void Plane::repr() const {
     printf("%s N: (%.2f, %.2f, %.2f) D: %f \n", name.c_str(), n[0], n[1], n[2], d);
 }
 
-cv::Vec3f Plane::normalVector(cv::Vec3f point) const {
+cv::Vec3d Plane::normalVector(cv::Vec3d point) const {
     return n;
 }

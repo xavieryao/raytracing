@@ -12,15 +12,15 @@ struct Material {
     cv::Vec3b color; /* kd: diffuse coefficient, or the surface color */
     cv::Vec3b ks; /* ks: specular coefficient, or the specular color, of the surface. */
     cv::Vec3b ka; /* ka: the surface's ambient coefficient, or the ambient color. */
-    float km; /* km: mirror coefficient */
+    double km; /* km: mirror coefficient */
     int p; /* Phong exponent */
     bool dielectric;
-    float ar, ag, ab; /* RGB refraction factor */
-    float nt; /* refractive index */
+    double ar, ag, ab; /* RGB refraction factor */
+    double nt; /* refractive index */
 
     Material() : ks(cv::Vec3b(255, 255, 255)), p(100) {}
 
-    Material(cv::Vec3b color, cv::Vec3b ks, cv::Vec3b ka, float km, int p) {
+    Material(cv::Vec3b color, cv::Vec3b ks, cv::Vec3b ka, double km, int p) {
         this->color = color;
         this->ks = ks;
         this->ka = ka;

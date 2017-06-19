@@ -9,7 +9,7 @@ void World::addObject(Object *obj) {
     objects.push_back(obj);
 }
 
-void World::render(float l, float r, float b, float t, float d, int nx, int ny, Camera& cam, cv::Mat &mat) const {
+void World::render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, cv::Mat &mat) const {
     auto& uu = cam.u;
     auto& vv = cam.v;
     auto& ww = cam.w;
@@ -31,7 +31,7 @@ void World::render(float l, float r, float b, float t, float d, int nx, int ny, 
  * d: view depth
  * nx, ny: height and width
  */
-void World::render(float l, float r, float b, float t, float d, int nx, int ny, Camera& cam, bool ssaa) const {
+void World::render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, bool ssaa) const {
     if (!ssaa) {
         auto image = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
         render(l, r, b, t, d, nx, ny, cam, image);
@@ -60,7 +60,7 @@ Color World::superSample(int i, int j, int nx, int ny, cv::Mat &image) const {
     Color mean = 0;
     int dxs[] = {-1, 0, 1};
     int dys[] = {-1, 0, 1};
-    float weights[] = {1, 2, 1, 2, 4, 2, 1, 2, 1};
+    double weights[] = {1, 2, 1, 2, 4, 2, 1, 2, 1};
     int pixels = 16;
     int k = 0;
     for (auto dx : dxs) {
@@ -94,14 +94,14 @@ std::string World::getName() const {
     return name;
 }
 
-World::World(Color bgColor, float aIntensity, std::string name) {
+World::World(Color bgColor, double aIntensity, std::string name) {
     this->name = name;
     this->aIntensity = aIntensity;
     this->bgColor = bgColor;
 }
 
-Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
-    float t;
+Color World::rayTracing(Ray &ray, int depth, double epsilon) const {
+    double t;
     Object *object = hit(t, ray, epsilon);
     if (object == nullptr) {
         printf("bgColor");
@@ -128,7 +128,7 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
         Vec tt;
         double c = 0;
 
-        constexpr float _ep = 0.01;
+        constexpr double _ep = 0.01;
 
         if (d.ddot(n) < 0) { /* in */
             printf("in\n");
@@ -189,7 +189,7 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
         lt = normalize(lt);
         Ray shadowRay(intersection, lt);
 
-        float s;
+        double s;
         if (!hit(s, shadowRay, 0.01, max)) {
             Vec h = normalize(v + lt);
             double a = n.ddot(lt);
@@ -218,7 +218,7 @@ Vec World::normalize(Vec v) {
     return v / cv::norm(v);
 }
 
-Object *World::hit(float &t, Ray &ray, float epsilon, double max) const {
+Object *World::hit(double &t, Ray &ray, double epsilon, double max) const {
     t = INT_MAX;
     Object *object = nullptr;
     for (auto obj : objects) {
@@ -236,7 +236,7 @@ void World::printVec(Vec &v) {
     printf("(%.2f %.2f %.2f)\n", v[0], v[1], v[2]);
 }
 
-bool World::refract(Vec &d, Vec &n, float nt, Vec &t) const {
+bool World::refract(Vec &d, Vec &n, double nt, Vec &t) const {
     /*
      * assuming the refractive index of the environment is 1.
      */

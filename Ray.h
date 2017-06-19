@@ -8,12 +8,12 @@
 #include <cstdio>
 
 struct Ray {
-    cv::Vec3f origin;
-    cv::Vec3f direction;
-    cv::Vec3f invDir;
+    cv::Vec3d origin;
+    cv::Vec3d direction;
+    cv::Vec3d invDir;
     int sign[3];
 
-    Ray(cv::Vec3f origin, cv::Vec3f direction) {
+    Ray(cv::Vec3d origin, cv::Vec3d direction) {
         this->origin = origin;
         this->direction = direction/cv::norm(direction);
         for (int i = 0; i < 3; i++) {

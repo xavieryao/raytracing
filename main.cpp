@@ -14,7 +14,7 @@ int main() {
     m1.ks = Color(230, 230, 230);
     m1.ka = 0.9*m1.color;
     m1.p = 100;
-    m1.dielectric = false;
+    m1.dielectric = true;
     m1.ab = 0.08;
     m1.ag = 0.08;
     m1.ar = 0.08;
@@ -41,10 +41,10 @@ int main() {
     Plane* back = new Plane(Vec(0, 0, -1), 10, randMaterials[4], "back");
 
     World w(Color(10, 10, 10), 0.2);
-    Light* light = new Light(cv::Vec3f(0, 10, -2));
-    Light* light2 = new Light(cv::Vec3f(12, 10, -2));
-    Light* light3 = new Light(cv::Vec3f(0, 0, -2), 0.5);
-//    Light* light4 = new Light(cv::Vec3f(-3, -3, -2));
+    Light* light = new Light(cv::Vec3d(0, 10, -2));
+    Light* light2 = new Light(cv::Vec3d(12, 10, -2));
+    Light* light3 = new Light(cv::Vec3d(0, 0, -2), 0.5);
+//    Light* light4 = new Light(cv::Vec3d(-3, -3, -2));
 
     Sphere* sp = new Sphere(Vec(0, -7 , 2.8), 2.5, m1, "sp");
     randMaterials[5].km = 0.3;

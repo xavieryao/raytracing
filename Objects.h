@@ -15,18 +15,18 @@
  * axis aligned bounding box
  */
 struct AABB {
-    cv::Vec3f bounds[2];
+    cv::Vec3d bounds[2];
 
     AABB() {}
 
-    AABB(cv::Vec3f min, cv::Vec3f max) {
+    AABB(cv::Vec3d min, cv::Vec3d max) {
         this->bounds[0] = min;
         this->bounds[1] = max;
     }
 
     bool intersect(const Ray &r) const
     {
-        float tmin, tmax, tymin, tymax, tzmin, tzmax;
+        double tmin, tmax, tymin, tymax, tzmin, tzmax;
 
         tmin = (bounds[r.sign[0]][0] - r.origin[0]) * r.invDir[0];
         tmax = (bounds[1-r.sign[0]][0] - r.origin[0]) * r.invDir[0];
@@ -57,7 +57,7 @@ struct AABB {
 class Object {
 
 public:
-    static float NO_INTERSECTION;
+    static double NO_INTERSECTION;
 
     Material material;
     AABB aabb;
@@ -65,33 +65,33 @@ public:
     std::string name = "Untitled";
 
     virtual ~Object() {};
-    virtual float intersect(Ray ray) const = 0;
+    virtual double intersect(Ray ray) const = 0;
     virtual void repr() const = 0;
-    virtual cv::Vec3f normalVector(cv::Vec3f point) const = 0;
+    virtual cv::Vec3d normalVector(cv::Vec3d point) const = 0;
 };
 
 class Sphere : public Object {
 private:
-    cv::Vec3f center;
-    float radius;
+    cv::Vec3d center;
+    double radius;
 
 public:
-    Sphere(cv::Vec3f center, float radius, Material& mat, std::string name="Untitled");
-    float intersect(Ray ray) const override;
+    Sphere(cv::Vec3d center, double radius, Material& mat, std::string name="Untitled");
+    double intersect(Ray ray) const override;
     void repr() const override;
-    cv::Vec3f normalVector(cv::Vec3f point) const override;
+    cv::Vec3d normalVector(cv::Vec3d point) const override;
 };
 
 class Plane : public Object {
 private:
-    cv::Vec3f n;
-    float d;
+    cv::Vec3d n;
+    double d;
 
 public:
-    Plane(cv::Vec3f n, float d, Material& m, std::string name="Untitled");
-    float intersect(Ray ray) const override;
+    Plane(cv::Vec3d n, double d, Material& m, std::string name="Untitled");
+    double intersect(Ray ray) const override;
     void repr() const override;
-    cv::Vec3f normalVector(cv::Vec3f point) const override;
+    cv::Vec3d normalVector(cv::Vec3d point) const override;
 };
 
 #endif //RAYTRACING_OBJECT_H
