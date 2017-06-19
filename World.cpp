@@ -111,7 +111,7 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
-    Vec d = ray.direction;
+    Vec d = normalize(ray.direction);
 
     /*
     * Refraction
@@ -144,7 +144,7 @@ Color World::rayTracing(Ray &ray, int depth, float epsilon) const {
             auto neg_n = -n;
 
             if (refract(d, neg_n, 1/object->material.nt, tt)) {
-                c = tt.ddot(n);
+                c = (normalize(tt)).ddot(n);
             } else {
                 Color color = rayTracing(reflectRay, depth-1, _ep);
                 color[0] *= kb;

@@ -14,7 +14,7 @@ int main() {
     m1.ks = Color(230, 230, 230);
     m1.ka = 0.9*m1.color;
     m1.p = 100;
-    m1.dielectric = true;
+    m1.dielectric = false;
     m1.ab = 0.08;
     m1.ag = 0.08;
     m1.ar = 0.08;
@@ -59,12 +59,12 @@ int main() {
 //    w.addObject(another_sp);
 
     w.addObject(ground);
-    w.addObject(left);
-    w.addObject(right);
-    w.addObject(top);
-    w.addObject(back);
+//    w.addObject(left);
+//    w.addObject(right);
+//    w.addObject(top);
+//    w.addObject(back);
 
-    constexpr int size = 100;
+    constexpr int size = 300;
     constexpr int frame = 50;
 
     Camera cam(Vec(0, -5, -0.5f));
