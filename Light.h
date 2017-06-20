@@ -7,22 +7,32 @@
 
 #include <opencv2/core/core.hpp>
 #include <cstdio>
+#include <cstdlib>
 
 /*
  * point light source
  */
 struct Light {
-    cv::Vec3d position;
+    cv::Vec3d corner;
+    cv::Vec3d edgeB;
+    cv::Vec3d edgeA;
     double intensity;
 
-    Light(cv::Vec3d pos, double intensity = 1) {
-        this->position = pos;
+    Light(cv::Vec3d corner, cv::Vec3d edgeA, cv::Vec3d edgeB, double intensity = 1) {
+        this->corner = corner;
+        this->edgeA = edgeA;
+        this->edgeB = edgeB;
         this->intensity = intensity;
     }
 
-    void repr() const {
-        printf("Pos: (%.2f %.2f %.2f), intensity %.2f\n", position[0], position[1], position[2], intensity);
+    cv::Vec3d randomPoint() {
+        return this->corner + random()*this->edgeA + random()*this->edgeB;
     }
+
+    static double random() {
+        return static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
+    };
+
 };
 
 

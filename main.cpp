@@ -42,9 +42,9 @@ int main() {
     Plane* back = new Plane(Vec(0, 0, -1), 10, randMaterials[4], "back");
 
     World w(Color(10, 10, 10), 0.5);
-    Light* light = new Light(cv::Vec3d(-8, 10, -2), 1.5);
-    Light* light2 = new Light(cv::Vec3d(8, 10, 2), 1.5);
-    Light* light3 = new Light(cv::Vec3d(0, 0, -2), 0.5);
+    Light* light = new Light(cv::Vec3d(-8, 10, -2), cv::Vec3d(-0.03, 0.02, 0.02), cv::Vec3d(0.015, 0.02, 0.02), 1.5);
+    Light* light2 = new Light(cv::Vec3d(8, 10, 2), cv::Vec3d(0.12, 0.12, 0.12), cv::Vec3d(0.023, 0.02, 0.02), 1.5);
+   // Light* light3 = new Light(cv::Vec3d(0, 0, -2), 0.5);
 //    Light* light4 = new Light(cv::Vec3d(-3, -3, -2));
 
     Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, m1, "sp");
@@ -62,15 +62,15 @@ int main() {
     w.addObject(ground);
 //    w.addObject(left);
 //    w.addObject(right);
-    w.addObject(top);
+//    w.addObject(top);
 //    w.addObject(back);
 
-    constexpr int size = 500;
+    constexpr int size = 1000;
     constexpr int frame = 15;
 
     Camera cam(Vec(0, 0, -8));
     cam.pitch(10);
-    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 9);
+    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 32);
 
     return 0;
 }

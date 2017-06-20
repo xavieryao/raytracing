@@ -194,7 +194,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
     Color color = object->material.ka * aIntensity;
     for (Light *light: lightSources) {
 
-        Vec lt = light->position - intersection;
+        Vec lt = light->randomPoint() - intersection;
         double max = cv::norm(lt);
         lt = normalize(lt);
         Ray shadowRay(intersection, lt);
