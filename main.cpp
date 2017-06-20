@@ -63,11 +63,11 @@ int main() {
     w.addObject(top);
 //    w.addObject(back);
 
-    constexpr int size = 300;
+    constexpr int size = 500;
     constexpr int frame = 20;
 
     Camera cam(Vec(0, 0, -5));
-    w.render(-frame, frame, -frame, frame, 9, size, size, cam, false);
+    w.render(-frame, frame, -frame, frame, 9, size, size, cam, true);
 
     return 0;
 }
