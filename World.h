@@ -18,29 +18,31 @@ typedef cv::Vec3d Vec;
 
 class World {
 private:
+    bool verbose;
+
     std::vector<Object*> objects;
     std::vector<Light*> lightSources;
     std::string name;
     Color bgColor;
     double aIntensity;
 
-    Color rayTracing(Ray& ray, int depth=7, double epsilon = .0) const;
-    Object* hit(double& t, Ray& ray, double epsilon = .0, double max = INT_MAX) const;
+    Color rayTracing(Ray& ray, int depth=7, double epsilon = .0) ;
+    Object* hit(double& t, Ray& ray, double epsilon = .0, double max = INT_MAX) ;
     static Vec normalize(Vec v);
     static void printVec(Vec& v);
     static void printColor(Color& c);
-    bool refract(Vec& d, Vec&n, double nt, Vec& t) const;
-    void render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, cv::Mat& mat) const;
-    Color superSample(int i, int j, int nx, int ny, cv::Mat &image) const;
+    bool refract(Vec& d, Vec&n, double nt, Vec& t) ;
+    void render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, cv::Mat& mat);
+    Color superSample(int i, int j, int nx, int ny, cv::Mat &image) ;
 
 public:
     World(Color bgColor = Color(255,255,255), double aIntensity = 0, std::string name="Brave New World");
-    std::string getName() const;
+    std::string getName() ;
     void setName(std::string name);
     void addObject(Object* obj);
     void addLightSource(Light* l);
     void render(double l, double r, double b, double t, double d, int nx, int ny,
-                Camera& cam, bool ssaa=false) const;
+                Camera& cam, bool ssaa=false) ;
     ~World();
 };
 

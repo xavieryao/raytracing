@@ -16,15 +16,15 @@ double Sphere::intersect(Ray ray) const {
     auto& c = center;
     auto ec = e-c;
     auto dd = d.ddot(d);
-    double delta = static_cast<double>(std::pow(d.ddot(ec), 2) - dd*(ec.ddot(ec) - std::pow(radius, 2)));
+    double delta = std::pow(d.ddot(ec), 2) - dd*(ec.ddot(ec) - std::pow(radius, 2));
     if (delta < 0) {
         return Object::NO_INTERSECTION;
     }
 
     double sqrt_delta = std::sqrt(delta);
-    double t1 = static_cast<double>((-d.ddot(ec)+sqrt_delta)/dd);
-    double t2 = static_cast<double>((-d.ddot(ec)-sqrt_delta)/dd);
-    return t2 < 0 ? t1 : t2;
+    double t1 = (-d.ddot(ec)+sqrt_delta)/dd;
+    double t2 = (-d.ddot(ec)-sqrt_delta)/dd;
+    return t2 < 0.00001 ? t1 : t2;
 }
 
 Sphere::Sphere(cv::Vec3d center, double radius, Material& mat, std::string name) {

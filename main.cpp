@@ -64,7 +64,7 @@ int main() {
 //    w.addObject(top);
 //    w.addObject(back);
 
-    constexpr int size = 300;
+    constexpr int size = 100;
     constexpr int frame = 50;
 
     Camera cam(Vec(0, -5, -0.5f));
