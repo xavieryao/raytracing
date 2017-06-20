@@ -31,12 +31,12 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
             unsigned long green = 0;
             unsigned long red = 0;
 
-
+            #pragma omp parallel for
             for (int k = 0; k < sampleTimes; k++) {
                 auto u = l + (r - l) * (i + random()) / ny;
                 auto v = b + (t - b) * (j + random()) / nx;
                 auto direction = -d * ww + u * uu + v * vv;
-                auto ray = Ray(cam.eye, direction);
+                auto ray = Ray(cam.randomEye(), direction);
                 Color color = rayTracing(ray);
                 blue += color[0];
                 green += color[1];

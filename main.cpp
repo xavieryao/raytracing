@@ -49,6 +49,7 @@ int main() {
 
     Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, m1, "sp");
     Sphere* anotherSp = new Sphere(Vec(3, 3, 5), 4, randMaterials[1], "another_sp");
+    Sphere* distantSp = new Sphere(Vec(-8, 8, 25), 5, randMaterials[1], "distantSp");
     randMaterials[5].km = 0.3;
 
     w.addLightSource(light);
@@ -58,6 +59,7 @@ int main() {
 
     w.addObject(sp);
     w.addObject(anotherSp);
+    w.addObject(distantSp);
 
     w.addObject(ground);
 //    w.addObject(left);
@@ -65,12 +67,12 @@ int main() {
 //    w.addObject(top);
 //    w.addObject(back);
 
-    constexpr int size = 1000;
+    constexpr int size = 2000;
     constexpr int frame = 15;
 
-    Camera cam(Vec(0, 0, -8));
+    Camera cam(Vec(0, 1, -5));
     cam.pitch(10);
-    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 32);
+    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 64);
 
     return 0;
 }
