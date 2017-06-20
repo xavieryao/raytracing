@@ -15,10 +15,10 @@ int main() {
     m1.ka = 0.9*m1.color;
     m1.p = 100;
     m1.dielectric = true;
-    m1.ab = 0.0008;
-    m1.ag = 0.0008;
-    m1.ar = 0.0012;
-    m1.nt = 1.2;
+    m1.ab = 0.00001;
+    m1.ag = 0.00001;
+    m1.ar = 0.00001;
+    m1.nt = 1.15;
 
     Material randMaterials[10];
     for (int i = 0; i < 10; ++i) {
