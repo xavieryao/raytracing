@@ -17,7 +17,7 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
     for (int i = 0; i < ny; ++i) {
 //        printf("column %d\n", i);
         for (int j = 0; j < nx; ++j) {
-            verbose =  (i == 46 and (j == 51 or j == 52));
+            //verbose =  (i == 46 and (j == 51 or j == 52));
             if (verbose) printf("pixel %d %d\n", i, j);
 
             auto u = l + (r - l) * (i + 0.5) / ny;

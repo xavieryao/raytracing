@@ -15,9 +15,9 @@ int main() {
     m1.ka = 0.9*m1.color;
     m1.p = 100;
     m1.dielectric = true;
-    m1.ab = 0.08;
-    m1.ag = 0.08;
-    m1.ar = 0.08;
+    m1.ab = 0.0008;
+    m1.ag = 0.0008;
+    m1.ar = 0.0012;
     m1.nt = 1.2;
 
     Material randMaterials[10];
@@ -41,18 +41,17 @@ int main() {
     Plane* back = new Plane(Vec(0, 0, -1), 10, randMaterials[4], "back");
 
     World w(Color(10, 10, 10), 0.2);
-    Light* light = new Light(cv::Vec3d(0, 10, -2));
-    Light* light2 = new Light(cv::Vec3d(12, 10, -2));
+    Light* light = new Light(cv::Vec3d(-8, 10, -2), 1.5);
+    Light* light2 = new Light(cv::Vec3d(8, 10, 2), 1.5);
     Light* light3 = new Light(cv::Vec3d(0, 0, -2), 0.5);
 //    Light* light4 = new Light(cv::Vec3d(-3, -3, -2));
 
-    Sphere* sp = new Sphere(Vec(0, -7 , 2.8), 2.5, m1, "sp");
+    Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, m1, "sp");
     randMaterials[5].km = 0.3;
-    Sphere* another_sp = new Sphere(Vec(0, -10, 1.0), 0.8, randMaterials[5]);
 
     w.addLightSource(light);
     w.addLightSource(light2);
-    w.addLightSource(light3);
+//    w.addLightSource(light3);
 //    w.addLightSource(light4);
 
     w.addObject(sp);
@@ -61,13 +60,13 @@ int main() {
     w.addObject(ground);
 //    w.addObject(left);
 //    w.addObject(right);
-//    w.addObject(top);
+    w.addObject(top);
 //    w.addObject(back);
 
-    constexpr int size = 100;
-    constexpr int frame = 50;
+    constexpr int size = 300;
+    constexpr int frame = 20;
 
-    Camera cam(Vec(0, -5, -0.5f));
+    Camera cam(Vec(0, 0, -5));
     w.render(-frame, frame, -frame, frame, 9, size, size, cam, false);
 
     return 0;

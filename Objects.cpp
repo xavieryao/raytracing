@@ -24,7 +24,7 @@ double Sphere::intersect(Ray ray) const {
     double sqrt_delta = std::sqrt(delta);
     double t1 = (-d.ddot(ec)+sqrt_delta)/dd;
     double t2 = (-d.ddot(ec)-sqrt_delta)/dd;
-    return t2 < 0.00001 ? t1 : t2;
+    return t2 < 0.0001 ? t1 : t2;
 }
 
 Sphere::Sphere(cv::Vec3d center, double radius, Material& mat, std::string name) {
