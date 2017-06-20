@@ -9,71 +9,52 @@ void World::addObject(Object *obj) {
     objects.push_back(obj);
 }
 
-void World::render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, cv::Mat &mat) {
+/*
+ * l,r,b,t: describes view (how broad you can see)
+ * d: view depth
+ * nx, ny: height and width
+ */
+void World::render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, int sampleTimes){
+    auto mat = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
+
     auto& uu = cam.u;
     auto& vv = cam.v;
     auto& ww = cam.w;
+
 
     #pragma omp parallel for collapse(2)
     for (int i = 0; i < ny; ++i) {
         for (int j = 0; j < nx; ++j) {
             if (verbose) printf("pixel %d %d\n", i, j);
 
-            auto u = l + (r - l) * (i + 0.5) / ny;
-            auto v = b + (t - b) * (j + 0.5) / nx;
-            auto direction = -d * ww + u * uu + v * vv;
-            auto ray = Ray(cam.eye, direction);
-            mat.at<Color>(j, i) = rayTracing(ray);
-        }
-    }
-}
+            unsigned long blue = 0;
+            unsigned long green = 0;
+            unsigned long red = 0;
 
-/*
- * l,r,b,t: describes view (how broad you can see)
- * d: view depth
- * nx, ny: height and width
- */
-void World::render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, bool ssaa) {
-    if (!ssaa) {
-        auto image = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
-        render(l, r, b, t, d, nx, ny, cam, image);
-        auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
-        cv::imwrite(filename, image);
-    } else {
-        // super sampling
-        auto sampledImage = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
-        auto image = cv::Mat(nx * 2, ny * 2, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
-        render(l, r, b, t, d, nx * 2, ny * 2, cam, image);
 
-        for (int i = 0; i < nx; ++i) {
-            for (int j = 0; j < ny; ++j) {
-                sampledImage.at<Color>(i, j) = superSample(i, j, nx, ny, image);
+            for (int k = 0; k < sampleTimes; k++) {
+                auto u = l + (r - l) * (i + random()) / ny;
+                auto v = b + (t - b) * (j + random()) / nx;
+                auto direction = -d * ww + u * uu + v * vv;
+                auto ray = Ray(cam.eye, direction);
+                Color color = rayTracing(ray);
+                blue += color[0];
+                green += color[1];
+                red += color[2];
             }
-        }
-        auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
-        cv::imwrite(filename, sampledImage);
-    }
 
-}
-
-Color World::superSample(int i, int j, int nx, int ny, cv::Mat &image)  {
-    #define VALID_IDX(x, y) (x > 0 && x < 2*nx && y > 0 && y < 2*ny)
-    // 3*3 kernel
-    Color mean = 0;
-    int dxs[] = {-1, 0, 1};
-    int dys[] = {-1, 0, 1};
-    double weights[] = {1, 2, 1, 2, 4, 2, 1, 2, 1};
-    int pixels = 16;
-    int k = 0;
-    for (auto dx : dxs) {
-        for (auto dy: dys) {
-            mean += VALID_IDX(2 * i + dx, 2 * j + dy) ? image.at<Color>(2 *i +dx, 2 * j + dy) * (weights[k]/pixels) :
-                    image.at<Color>(2 * i, 2 * j) * (weights[k]/pixels);
-            k++;
+            mat.at<Color>(j, i) = Color(static_cast<uchar>(blue / sampleTimes), static_cast<uchar>(green / sampleTimes),
+                                        static_cast<uchar>(red / sampleTimes));
         }
     }
-    return mean;
+
+    /*
+     * save image
+     */
+    auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
+    cv::imwrite(filename, mat);
 }
+
 
 void World::addLightSource(Light *l) {
     lightSources.push_back(l);
@@ -102,7 +83,7 @@ World::World(Color bgColor, double aIntensity, std::string name) {
     this->bgColor = bgColor;
 }
 
-Color World::rayTracing(Ray &ray, int depth, double epsilon)  {
+Color World::rayTracing(Ray &ray, int depth, double epsilon){
     double t;
     Object *object = hit(t, ray, epsilon);
     if (object == nullptr) {
@@ -235,10 +216,12 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon)  {
         return color;
     }
     if (object->material.km != .0) {
+//        this->verbose = true;
         Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
         Ray mirrorRay(intersection, r);
         Color rColor = rayTracing(mirrorRay, depth-1, 0.01);
         color += object->material.km*rColor;
+//        this->verbose = false;
     }
     return color;
 }
@@ -247,7 +230,7 @@ Vec World::normalize(Vec v) {
     return v / cv::norm(v);
 }
 
-Object *World::hit(double &t, Ray &ray, double epsilon, double max)  {
+Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
     t = INT_MAX;
     Object *object = nullptr;
     for (auto obj : objects) {
@@ -272,7 +255,7 @@ void World::printVec(Vec &v) {
     printf("(%.2f %.2f %.2f)\n", v[0], v[1], v[2]);
 }
 
-bool World::refract(Vec &d, Vec &n, double nt, Vec &t)  {
+bool World::refract(Vec &d, Vec &n, double nt, Vec &t){
     /*
      * assuming the refractive index of the environment is 1.
      */

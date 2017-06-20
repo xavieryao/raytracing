@@ -18,35 +18,37 @@ int main() {
     m1.ab = 0.00001;
     m1.ag = 0.00001;
     m1.ar = 0.00001;
-    m1.nt = 1.15;
+    m1.nt = 1.05;
 
     Material randMaterials[10];
     for (int i = 0; i < 10; ++i) {
         randMaterials[i] = Material::randomMaterial();
     }
 
-//    randMaterials[0].km = 0.7;
-//    randMaterials[0].color = Color(120, 120, 120);
-//    randMaterials[0].ka = Color(20, 20, 20);
+    randMaterials[1].km = 0.8;
+//    randMaterials[0].color = Color(0, 0, 0);
+//    randMaterials[0].ka = Color(0, 0, 0);
 //    randMaterials[0].ks = Color(140, 140, 140);
 
 
-//    randMaterials[1].km = 0.4;
-    randMaterials[0].p = 200;
+//    randMaterials[0].km = 0.5;
+//    randMaterials[0].p = 20;
+//    randMaterials[3].km = 0.5;
 
-    Plane* ground = new Plane(Vec(0, 1, 0), 15, randMaterials[0], "ground");
+    Plane* ground = new Plane(Vec(0, 1, 0), 10, randMaterials[0], "ground");
     Plane* left = new Plane(Vec(1, 0, 0), 50, randMaterials[1], "left");
     Plane* right = new Plane(Vec(-1, 0, 0), 50, randMaterials[2], "right");
-    Plane* top = new Plane(Vec(0, -1, 0), 20, randMaterials[3], "top");
+    Plane* top = new Plane(Vec(0, -1, 0), 15, randMaterials[3], "top");
     Plane* back = new Plane(Vec(0, 0, -1), 10, randMaterials[4], "back");
 
-    World w(Color(10, 10, 10), 0.2);
+    World w(Color(10, 10, 10), 0.5);
     Light* light = new Light(cv::Vec3d(-8, 10, -2), 1.5);
     Light* light2 = new Light(cv::Vec3d(8, 10, 2), 1.5);
     Light* light3 = new Light(cv::Vec3d(0, 0, -2), 0.5);
 //    Light* light4 = new Light(cv::Vec3d(-3, -3, -2));
 
     Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, m1, "sp");
+    Sphere* anotherSp = new Sphere(Vec(3, 3, 5), 4, randMaterials[1], "another_sp");
     randMaterials[5].km = 0.3;
 
     w.addLightSource(light);
@@ -55,7 +57,7 @@ int main() {
 //    w.addLightSource(light4);
 
     w.addObject(sp);
-//    w.addObject(another_sp);
+    w.addObject(anotherSp);
 
     w.addObject(ground);
 //    w.addObject(left);
@@ -64,10 +66,11 @@ int main() {
 //    w.addObject(back);
 
     constexpr int size = 500;
-    constexpr int frame = 20;
+    constexpr int frame = 15;
 
-    Camera cam(Vec(0, 0, -5));
-    w.render(-frame, frame, -frame, frame, 9, size, size, cam, true);
+    Camera cam(Vec(0, 0, -8));
+    cam.pitch(10);
+    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 9);
 
     return 0;
 }
