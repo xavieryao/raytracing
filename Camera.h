@@ -11,7 +11,8 @@
 struct Camera {
     cv::Vec3d eye;
     cv::Vec3d u, v, w; // three axes.
-    Camera(cv::Vec3d eye) : eye(eye), u(1, 0, 0), v(0, -1, 0), w(0, 0, -1) { }
+    double focus;
+    Camera(cv::Vec3d eye) : eye(eye), u(1, 0, 0), v(0, -1, 0), w(0, 0, -1), focus(0.0001) { }
 
     void yaw(double deg) {
         auto rad = deg/180*M_PI;
@@ -43,9 +44,8 @@ struct Camera {
                       v[2]);
     }
 
-    static double random() {
-        constexpr double HALF_RANGE = 0.005;
-        return -HALF_RANGE + static_cast<double>(rand()) / (RAND_MAX/(HALF_RANGE*2));
+    double random() {
+        return -focus + static_cast<double>(rand()) / (RAND_MAX/(focus*2));
     };
 
     cv::Vec3d randomEye() {
