@@ -5,6 +5,8 @@
 #include "World.h"
 #include "tqdm/tqdm.h"
 
+#define VERBOSE false
+
 void World::addObject(Object *obj) {
     objects.push_back(obj);
 }
@@ -25,7 +27,7 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
     #pragma omp parallel for collapse(2)
     for (int i = 0; i < ny; ++i) {
         for (int j = 0; j < nx; ++j) {
-            if (verbose) printf("pixel %d %d\n", i, j);
+            if (VERBOSE) printf("pixel %d %d\n", i, j);
 
             unsigned long blue = 0;
             unsigned long green = 0;
@@ -37,7 +39,7 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
                 auto v = b + (t - b) * (j + random()) / nx;
                 auto direction = -d * ww + u * uu + v * vv;
                 auto ray = Ray(cam.randomEye(), direction);
-                Color color = rayTracing(ray);
+                Color color = rayTracing(ray, bgColor, objects, lightSources, aIntensity);
                 blue += color[0];
                 green += color[1];
                 red += color[2];
@@ -83,9 +85,10 @@ World::World(Color bgColor, double aIntensity, std::string name) {
     this->bgColor = bgColor;
 }
 
-Color World::rayTracing(Ray &ray, int depth, double epsilon){
+Color World::rayTracing(Ray& ray, Color& bgColor, std::vector<Object*>& objects, std::vector<Light*>& lightSources,
+                               double aIntensity, int depth, double epsilon) {
     double t;
-    Object *object = hit(t, ray, epsilon);
+    Object *object = hit(t, ray, objects, epsilon);
     if (object == nullptr) {
         return bgColor;
     }
@@ -95,7 +98,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
     Vec v = normalize(ray.origin - intersection);
     Vec d = normalize(ray.direction);
 
-    if (verbose) {
+    if (VERBOSE) {
         printf("交点 "); printVec(intersection);
         printf("法线 "); printVec(n);
         printf("实现 "); printVec(v);
@@ -106,7 +109,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
     */
     if (object->material.dielectric) {
         if (depth == 0) {
-            if (verbose) {
+            if (VERBOSE) {
                 printf("depth = 0\n");
             }
             return Color(0, 0, 0);
@@ -116,7 +119,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         Vec r = d - 2*(n.ddot(d))*n;
         Ray reflectRay(intersection, r);
 
-        if (verbose) {
+        if (VERBOSE) {
             printf("反射线");
             printVec(reflectRay.direction);
         }
@@ -127,14 +130,14 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         constexpr double _ep = 0.01;
 
         if (d.ddot(n) < 0) { /* in */
-            if (verbose) {
+            if (VERBOSE) {
                 printf("in\n");
             }
             refract(d, n, object->material.nt, tt);
             c = -d.ddot(n);
             kr = 1; kg = 1; kb = 1;
         } else { /* out */
-            if (verbose) {
+            if (VERBOSE) {
                 printf("out\n");
             }
 
@@ -146,11 +149,11 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
             if (refract(d, neg_n, 1/object->material.nt, tt)) {
                 c = (normalize(tt)).ddot(n);
             } else {
-                Color color = rayTracing(reflectRay, depth-1, _ep);
+                Color color = rayTracing(reflectRay, bgColor, objects, lightSources, aIntensity, depth-1, _ep);
                 color[0] *= kb;
                 color[1] *= kg;
                 color[2] *= kr;
-                if (verbose) {
+                if (VERBOSE) {
                     printf("full refraction: "); printColor(color);
                     printf("\n");
                 }
@@ -159,7 +162,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
             }
         }
         Ray refractRay(intersection, tt);
-        if (verbose) {
+        if (VERBOSE) {
             printf("折射线\n");
             printVec(tt);
         }
@@ -168,25 +171,25 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
 
         assert(R >= 0 && R <= 1);
 
-        if (verbose) {
+        if (VERBOSE) {
             printf("反射\n");
         }
-        Color reflectColor = rayTracing(reflectRay, depth-1, _ep);
-        if (verbose) {printf("reflectColor:");printColor(reflectColor);}
-        if (verbose) printf("折射\n");
-        Color refractColor = rayTracing(refractRay, depth-1, _ep);
-        if (verbose) {printf("refractColor:");printColor(refractColor);}
+        Color reflectColor = rayTracing(reflectRay, bgColor, objects, lightSources, aIntensity, depth-1, _ep);
+        if (VERBOSE) {printf("reflectColor:");printColor(reflectColor);}
+        if (VERBOSE) printf("折射\n");
+        Color refractColor = rayTracing(refractRay, bgColor, objects, lightSources, aIntensity, depth-1, _ep);
+        if (VERBOSE) {printf("refractColor:");printColor(refractColor);}
 
         Color color = R*reflectColor + (1-R)*refractColor;
 
-        if (verbose) printf("kb %.2f kg %.2f kr %.2f   before color: ", kb, kg, kr);
-        if (verbose) printColor(color);
+        if (VERBOSE) printf("kb %.2f kg %.2f kr %.2f   before color: ", kb, kg, kr);
+        if (VERBOSE) printColor(color);
         color[0] *= kb;
         color[1] *= kg;
         color[2] *= kr;
-        if (verbose) printf("after color: ");
-        if (verbose) printColor(color);
-        if (verbose) printf("\n");
+        if (VERBOSE) printf("after color: ");
+        if (VERBOSE) printColor(color);
+        if (VERBOSE) printf("\n");
         return color;
     }
 
@@ -200,7 +203,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         Ray shadowRay(intersection, lt);
 
         double s;
-        if (!hit(s, shadowRay, 0.01, max)) {
+        if (!hit(s, shadowRay, objects, 0.01, max)) {
             Vec h = normalize(v + lt);
             double a = n.ddot(lt);
             double b = n.ddot(h);
@@ -216,12 +219,12 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         return color;
     }
     if (object->material.km != .0) {
-//        this->verbose = true;
+//        this->VERBOSE = true;
         Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
         Ray mirrorRay(intersection, r);
-        Color rColor = rayTracing(mirrorRay, depth-1, 0.01);
+        Color rColor = rayTracing(mirrorRay, bgColor, objects, lightSources, aIntensity, depth-1, 0.01);
         color += object->material.km*rColor;
-//        this->verbose = false;
+//        this->VERBOSE = false;
     }
     return color;
 }
@@ -230,19 +233,19 @@ Vec World::normalize(Vec v) {
     return v / cv::norm(v);
 }
 
-Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
+Object *World::hit(double &t, Ray &ray, std::vector<Object*>& objects, double epsilon, double max) {
     t = INT_MAX;
     Object *object = nullptr;
     for (auto obj : objects) {
         auto tt = obj->intersect(ray);
-        if (verbose) {
+        if (VERBOSE) {
             printf("对物体 %s\n", obj->name.c_str());
             printf("tt=%f\n", tt);
         }
         if (tt > epsilon && tt < t && tt < max) {
             t = tt;
             object = obj;
-            if (verbose) {
+            if (VERBOSE) {
                 printf("接受\n");
             }
         }
