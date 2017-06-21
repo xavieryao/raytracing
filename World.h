@@ -30,7 +30,7 @@ private:
     double aIntensity;
 
     Color rayTracing(Ray& ray, int depth=5, double epsilon = .0);
-    Vec pathTracing(Ray& ray, int depth=5, double epsilon = .0);
+    Vec pathTracing(Ray& ray, int depth=0, double epsilon = .0);
     Object* hit(double& t, Ray& ray, double epsilon = .0, double max = INT_MAX);
     static Vec normalize(Vec v);
     static void printVec(Vec& v);
@@ -47,6 +47,7 @@ private:
     }
     bool refract(Vec& d, Vec&n, double nt, Vec& t);
     static Vec cosineRandomUnitVec(Vec& n) {
+
         double u1 = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
         double u2 = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
         double r = std::sqrt(u1);
@@ -61,6 +62,9 @@ private:
         } else {
             return unitVec;
         }
+    }
+    static Vec product(Vec a, Vec b) {
+        return Vec(a[1]*b[2] - a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]);
     }
 
 public:

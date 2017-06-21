@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(raytracing)
 
 
-SET (CMAKE_CXX_COMPILER  "/usr/local/bin/clang++omp")
+set (CMAKE_CXX_COMPILER  "/usr/local/bin/clang++omp")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -I/usr/local/opt/llvm/include -O3")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib -lc++")
 

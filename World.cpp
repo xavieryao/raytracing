@@ -301,10 +301,10 @@ void World::renderPT(double l, double r, double b, double t, double d, int nx, i
 #pragma omp parallel for collapse(2), schedule(dynamic, 1)
     for (int i = 0; i < ny; ++i) {
         for (int j = 0; j < nx; ++j) {
-            std::vector<double> sampleXs(sampleTimes);
-            std::vector<double> sampleYs(sampleTimes);
-            std::vector<double> cameraXs(sampleTimes);
-            std::vector<double> cameraYs(sampleTimes);
+//            std::vector<double> sampleXs(sampleTimes);
+//            std::vector<double> sampleYs(sampleTimes);
+//            std::vector<double> cameraXs(sampleTimes);
+//            std::vector<double> cameraYs(sampleTimes);
 
             if (verbose) printf("pixel %d %d\n", i, j);
 
@@ -312,8 +312,8 @@ void World::renderPT(double l, double r, double b, double t, double d, int nx, i
             double green = 0;
             double red = 0;
 
-            shuffle(cameraXs);
-            shuffle(cameraYs);
+//            shuffle(cameraXs);
+//            shuffle(cameraYs);
 
 #pragma omp parallel for
             for (int k = 0; k < sampleTimes; k++) {
@@ -322,14 +322,10 @@ void World::renderPT(double l, double r, double b, double t, double d, int nx, i
                 auto direction = -d * ww + u * uu + v * vv;
                 auto ray = Ray(cam.eye, direction);
                 Vec emission = pathTracing(ray);
-                blue += emission[0];
-                green += emission[1];
-                red += emission[2];
+                blue += emission[0] / sampleTimes;
+                green += emission[1] / sampleTimes;
+                red += emission[2] / sampleTimes;
             }
-
-            blue /= sampleTimes;
-            green /= sampleTimes;
-            red /= sampleTimes;
 
             if (blue < 0.) blue = 0.;
             if (green < 0.) green = 0.;
@@ -352,67 +348,104 @@ void World::renderPT(double l, double r, double b, double t, double d, int nx, i
 }
 
 Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
-    if (depth == 0) {
-        return Vec(0, 0, 0);
-    }
-
 
     double t;
     Object *object = hit(t, ray, epsilon);
     if (object == nullptr) {
+        printf("no hit\n");
         return Vec(0, 0, 0);
     }
 
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
-    Vec v = normalize(ray.origin - intersection);
     Vec d = normalize(ray.direction);
-
-    if (verbose) {
-        printf("交点 "); printVec(intersection);
-        printf("法线 "); printVec(n);
-        printf("视线 "); printVec(v);
-    }
+    n = n.ddot(ray.direction) < 0 ? n : -n;
 
     Material& material = object->material;
-    Vec emmittance = material.emission;
-    Vec randomDir = cosineRandomUnitVec(n);
-    Ray newRay(intersection, randomDir);
+    Vec f = Vec(material.color[0]/255., material.color[1]/255., material.color[2]/255.);
 
-    double cosTheta = randomDir.ddot(n);
-    Vec BRDF;
-    for (int i = 0; i < 3; ++i) {
-        BRDF[i] = (1./255.) * 2 * material.color[i] * cosTheta;
+    double p = std::max(f[0], std::max(f[1], f[2]));
+    if (depth > 8) {
+        if (std::abs(random()) < p) {
+            f = f * (1/p);
+        } else {
+            return material.emission;
+        }
     }
-    Vec reflected = pathTracing(newRay, depth+1, 0.0001);
-    for (int i = 0; i < 3; ++i) {
-        emmittance[i] += BRDF[i] * reflected[i];
-    }
-    return emmittance;
 
-    /*
-     * ideal specular reflection
-     */
-//    if (material.km != .0) {
-//        Vec emission = object->material.emission;
-//        Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
-//        Ray mirrorRay(intersection, r);
-//        Vec reflectEmission = pathTracing(mirrorRay, depth-1, 0.001);
-//        emission += object->material.km*reflectEmission;
-//        return emission;
-//    }
-//    assert(object->material.km == 0);
-//     end ideal specular reflection
-//
-    /*
-     * diffusion
-     */
-//    Vec emission = object->material.emission;
-//    Vec randomDir = cosineRandomUnitVec(n);
-//    Ray reflectRay(intersection, randomDir);
-//    Vec reflectEmission = pathTracing(reflectRay, depth-1, 0.001);
-//    for (int i = 0; i < 3; ++i) {
-//        emission[i] += object->material.color[i] * reflectEmission[i];
-//    }
-//    return emission;
+    if (material.dielectric) { // refraction
+        double kr, kg, kb;
+        Vec r = d - 2*(n.ddot(d))*n;
+        Ray reflectRay(intersection, r);
+
+        Vec tt;
+        double c = 0;
+
+        constexpr double _ep = 0.01;
+
+        if (d.ddot(n) < 0) { /* in */
+            refract(d, n, object->material.nt, tt);
+            c = -d.ddot(n);
+            kr = 1; kg = 1; kb = 1;
+        } else { /* out */
+            kr = exp(-object->material.ar*std::abs(t));
+            kg = exp(-object->material.ag*std::abs(t));
+            kb = exp(-object->material.ab*std::abs(t));
+            auto neg_n = -n;
+
+            if (refract(d, neg_n, 1/object->material.nt, tt)) {
+                c = (normalize(tt)).ddot(n);
+            } else {
+                Vec emission = pathTracing(reflectRay, depth+1, _ep);
+                emission[0] *= kb;
+                emission[1] *= kg;
+                emission[2] *= kr;
+                return emission;
+            }
+        }
+        Ray refractRay(intersection, tt);
+        auto R0 = std::pow((object->material.nt-1)/(object->material.nt+1), 2);
+        auto R = R0 + (1-R0)*std::pow(1-c, 5);
+
+        assert(R >= 0 && R <= 1);
+
+        Vec reflectEmission = pathTracing(reflectRay, depth+1, _ep);
+        Vec refractEmission = pathTracing(refractRay, depth+1, _ep);
+
+        Vec emission = R*reflectEmission + (1-R)*refractEmission;
+
+        emission[0] *= kb;
+        emission[1] *= kg;
+        emission[2] *= kr;
+        return emission;
+    } else if (material.km != 0) { // reflection
+        Vec emmittance = material.emission;
+        Vec r = d - 2*(n.ddot(d))*n;
+        Ray reflectRay(intersection, r);
+        return emmittance + pathTracing(reflectRay, depth+1, 0.00001);
+    } else { // diffusion
+        Vec emmittance = material.emission;
+        double r1 = 2*M_PI*static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
+        double r2 = static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
+        double r2s = std::sqrt(r2);
+
+        Vec w = n;
+        Vec u = normalize(product((fabs(w[0])>.1?Vec(0,1,0):Vec(1,0,0)),w));
+        Vec v = product(w, u);
+        Vec dir = normalize(u*std::cos(r1)*r2s + v*std::sin(r1)*r2s + w*std::sqrt(std::max(.0, 1-r2)));
+
+        Ray newRay(intersection, dir);
+
+        double cosTheta = dir.ddot(n);
+        Vec BRDF;
+        for (int i = 0; i < 3; ++i) {
+            BRDF[i] = (1./255.) * 2 * f[i] * cosTheta;
+        }
+        Vec reflected = pathTracing(newRay, depth+1, 0.0001);
+        for (int i = 0; i < 3; ++i) {
+            emmittance[i] += BRDF[i] * reflected[i];
+        }
+        return emmittance;
+    }
+
 }
