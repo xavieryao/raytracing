@@ -67,23 +67,19 @@ int main() {
 //    w.addObject(top);
 //    w.addObject(back);
 
-    constexpr int size = 2000;
+    constexpr int size = 1000;
     constexpr int frame = 15;
 
     Camera cam(Vec(0, 1, -5));
     cam.pitch(10);
 
     double focus = 0.00001;
-    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 24);
-
-    /*
     for (int i = 0; i < 15; i++) {
         cam.focus = focus;
         w.setName(std::to_string(focus));
         w.render(-frame, frame, -frame, frame, 9, size, size, cam, 3);
         focus *= 2;
     }
-     */
 
     return 0;
 }

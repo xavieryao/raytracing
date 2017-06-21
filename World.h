@@ -19,15 +19,16 @@ typedef cv::Vec3d Vec;
 
 class World {
 private:
+    bool verbose;
+
     std::vector<Object*> objects;
     std::vector<Light*> lightSources;
     std::string name;
     Color bgColor;
     double aIntensity;
 
-    static Color rayTracing(Ray& ray, Color& bgColor, std::vector<Object*>& objects, std::vector<Light*>& lightSource
-            , double aIntensity, int depth=5, double epsilon = .0);
-    static Object* hit(double& t, Ray& ray, std::vector<Object*>& objects, double epsilon = .0, double max = INT_MAX);
+    Color rayTracing(Ray& ray, int depth=5, double epsilon = .0);
+    Object* hit(double& t, Ray& ray, double epsilon = .0, double max = INT_MAX);
     static Vec normalize(Vec v);
     static void printVec(Vec& v);
     static void printColor(Color& c);
@@ -35,7 +36,7 @@ private:
         constexpr double HALF_RANGE = 1.5;
         return -HALF_RANGE + static_cast<double>(rand()) / (RAND_MAX/(HALF_RANGE*2));
     };
-    static bool refract(Vec& d, Vec&n, double nt, Vec& t);
+    bool refract(Vec& d, Vec&n, double nt, Vec& t);
 
 public:
     World(Color bgColor = Color(255,255,255), double aIntensity = 0, std::string name="Brave New World");
