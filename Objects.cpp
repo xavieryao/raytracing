@@ -47,7 +47,7 @@ cv::Vec3d Sphere::normalVector(cv::Vec3d point) const {
 }
 
 double Plane::intersect(Ray ray) const {
-    double t = -static_cast<double>((d + n.ddot(ray.origin))/(n.ddot(ray.direction)));
+    double t = -((d + n.ddot(ray.origin)) / (n.ddot(ray.direction)));
     return t;
 }
 
@@ -65,4 +65,59 @@ void Plane::repr() const {
 
 cv::Vec3d Plane::normalVector(cv::Vec3d point) const {
     return n;
+}
+
+double Rectangle::intersect(Ray ray) const {
+    double t = Plane::intersect(ray);
+    if (t < 0) {
+        return -1;
+    }
+
+    cv::Vec3d intersection = ray.origin + ray.direction * t;
+    cv::Vec3d vec = intersection - corner;
+
+    double x1 = edge1[0];
+    double x2 = edge2[0];
+    double y1 = edge1[1];
+    double y2 = edge2[1];
+
+    double a, b;
+    double delta = x1*y2-x2*y1;
+
+    a = y2*vec[0] - x2*vec[1];
+    b = -y1*vec[0] + x1*vec[1];
+
+    if (delta == 0) {
+        x1 = edge1[1];
+        x2 = edge2[1];
+        y1 = edge1[2];
+        y2 = edge2[2];
+        delta = x1*y2 - x2*y1;
+        a = y2*vec[1] - x2*vec[2];
+        b = -y1*vec[1] + x1*vec[2];
+    }
+    if (delta == 0) {
+        x1 = edge1[0];
+        x2 = edge2[0];
+        y1 = edge1[2];
+        y2 = edge2[2];
+        delta = x1*y2 - x2*y1;
+        a = y2*vec[0] - x2*vec[2];
+        b = -y1*vec[0] + x1*vec[2];
+    }
+    assert(delta != 0);
+    a /= delta;
+    b /= delta;
+    if (0 <= a && a <= 1 && 0 <= b && b <= 1) {
+        return t;
+    } else {
+        return -1;
+    }
+}
+
+Rectangle::Rectangle(cv::Vec3d n, double d, cv::Vec3d corner, cv::Vec3d edge1, cv::Vec3d edge2, Material &m,
+                     std::string name) : Plane(n, d, m, name){
+    this->corner = corner;
+    this->edge1 = edge1;
+    this->edge2 = edge2;
 }

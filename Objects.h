@@ -77,10 +77,11 @@ private:
 
 public:
     Sphere(cv::Vec3d center, double radius, Material& mat, std::string name="Untitled");
-    double intersect(Ray ray) const override;
+    virtual double intersect(Ray ray) const override;
     void repr() const override;
     cv::Vec3d normalVector(cv::Vec3d point) const override;
 };
+
 
 class Plane : public Object {
 private:
@@ -89,9 +90,19 @@ private:
 
 public:
     Plane(cv::Vec3d n, double d, Material& m, std::string name="Untitled");
-    double intersect(Ray ray) const override;
+    virtual double intersect(Ray ray) const override;
     void repr() const override;
     cv::Vec3d normalVector(cv::Vec3d point) const override;
+};
+
+class Rectangle : public Plane {
+private:
+    cv::Vec3d corner, edge1, edge2;
+public:
+    Rectangle(cv::Vec3d n, double d, cv::Vec3d corner, cv::Vec3d edge1, cv:: Vec3d edge2
+            , Material& m, std::string name="Untitled");
+
+    virtual double intersect(Ray ray) const override;
 };
 
 #endif //RAYTRACING_OBJECT_H

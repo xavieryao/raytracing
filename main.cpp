@@ -26,7 +26,6 @@ int main() {
     m1.ag = 0.00001;
     m1.ar = 0.00001;
     m1.nt = 1.05;
-    m1.emission = Vec(50, 51, 51);
 
     Material randMaterials[10];
     for (int i = 0; i < 10; ++i) {
@@ -34,14 +33,6 @@ int main() {
     }
 
     randMaterials[1].km = 0.8;
-//    randMaterials[0].color = Color(0, 0, 0);
-//    randMaterials[0].ka = Color(0, 0, 0);
-//    randMaterials[0].ks = Color(140, 140, 140);
-
-
-//    randMaterials[0].km = 0.5;
-//    randMaterials[0].p = 20;
-//    randMaterials[3].km = 0.5;
 
     Plane* ground = new Plane(Vec(0, 1, 0), 10, randMaterials[0], "ground");
     Plane* left = new Plane(Vec(1, 0, 0), 50, randMaterials[1], "left");
@@ -49,11 +40,12 @@ int main() {
     Plane* top = new Plane(Vec(0, -1, 0), 15, randMaterials[3], "top");
     Plane* back = new Plane(Vec(0, 0, -1), 10, randMaterials[4], "back");
 
+    randMaterials[5].emission = Vec(550, 550, 550);
+    Rectangle* led = new Rectangle(Vec(0, -1, 0), 13, Vec(0, 13, 4), Vec(4, 0, 0), Vec(0, 0, 4), randMaterials[5], "led");
+
     World w(Color(10, 10, 10), 0.5);
     Light* light = new Light(cv::Vec3d(-8, 10, -2), cv::Vec3d(-0.03, 0.02, 0.02), cv::Vec3d(0.015, 0.02, 0.02), 1.5);
     Light* light2 = new Light(cv::Vec3d(8, 10, 2), cv::Vec3d(0.12, 0.12, 0.12), cv::Vec3d(0.023, 0.02, 0.02), 1.5);
-   // Light* light3 = new Light(cv::Vec3d(0, 0, -2), 0.5);
-//    Light* light4 = new Light(cv::Vec3d(-3, -3, -2));
 
     Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, m1, "sp");
     Sphere* anotherSp = new Sphere(Vec(3, 3, 5), 4, randMaterials[1], "another_sp");
@@ -62,27 +54,22 @@ int main() {
 
     w.addLightSource(light);
     w.addLightSource(light2);
-//    w.addLightSource(light3);
-//    w.addLightSource(light4);
 
     w.addObject(sp);
     w.addObject(anotherSp);
     w.addObject(distantSp);
+    w.addObject(led);
 
     w.addObject(ground);
-//    w.addObject(left);
-//    w.addObject(right);
-//    w.addObject(top);
-//    w.addObject(back);
 
-    constexpr int size = 300;
+    constexpr int size = 200;
     constexpr int frame = 15;
 
     Camera cam(Vec(0, 1, -5));
     cam.pitch(10);
 
     double focus = 0.001;
-    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 25600);
+    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 51200);
 
     /*
     for (int i = 0; i < 25; i++) {

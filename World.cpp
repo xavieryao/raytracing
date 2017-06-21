@@ -66,7 +66,7 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
     /*
      * save image
      */
-    auto filename = "/Users/xavieryao/cg/rt/focus/" + name + ".png";
+    auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
     cv::imwrite(filename, mat);
 }
 
