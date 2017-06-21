@@ -13,6 +13,8 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <cstdlib>
+#include <algorithm>
+#include <vector>
 
 typedef cv::Vec3b Color;
 typedef cv::Vec3d Vec;
@@ -36,6 +38,12 @@ private:
         constexpr double HALF_RANGE = 1.5;
         return -HALF_RANGE + static_cast<double>(rand()) / (RAND_MAX/(HALF_RANGE*2));
     };
+    template <class T> static void shuffle(std::vector<T> vec) {
+        for (int i = 0; i < vec.size(); i++) {
+            auto rnd = i + rand() % (vec.size() - i);
+            std::swap(vec[i], vec[rnd]);
+        }
+    }
     bool refract(Vec& d, Vec&n, double nt, Vec& t);
 
 public:
@@ -44,7 +52,7 @@ public:
     void setName(std::string name);
     void addObject(Object* obj);
     void addLightSource(Light* l);
-    void render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, int sampleTimes=9);
+    void render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes=9);
 
     ~World();
 };

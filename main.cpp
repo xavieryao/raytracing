@@ -73,11 +73,11 @@ int main() {
     Camera cam(Vec(0, 1, -5));
     cam.pitch(10);
 
-    double focus = 0.00001;
-    for (int i = 0; i < 15; i++) {
+    double focus = 0.00000001;
+    for (int i = 0; i < 25; i++) {
         cam.focus = focus;
         w.setName(std::to_string(focus));
-        w.render(-frame, frame, -frame, frame, 9, size, size, cam, 3);
+        w.render(-frame, frame, -frame, frame, 9, size, size, cam, 16);
         focus *= 2;
     }
 

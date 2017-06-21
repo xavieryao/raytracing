@@ -44,12 +44,8 @@ struct Camera {
                       v[2]);
     }
 
-    double random() {
-        return -focus + static_cast<double>(rand()) / (RAND_MAX/(focus*2));
-    };
-
-    cv::Vec3d randomEye() {
-        return eye + random()*u + random()*v;
+    cv::Vec3d randomEye(double ksiX, double ksiY) {
+        return eye + ksiX * focus *u + ksiY * focus *v;
     }
 };
 

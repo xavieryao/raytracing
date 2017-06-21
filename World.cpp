@@ -14,7 +14,7 @@ void World::addObject(Object *obj) {
  * d: view depth
  * nx, ny: height and width
  */
-void World::render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, int sampleTimes){
+void World::render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes){
     auto mat = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
 
     auto& uu = cam.u;
@@ -22,7 +22,13 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
     auto& ww = cam.w;
 
 
-    #pragma omp parallel for collapse(2)
+    std::vector<double> sampleXs(sampleTimes);
+    std::vector<double> sampleYs(sampleTimes);
+    std::vector<double> cameraXs(sampleTimes);
+    std::vector<double> cameraYs(sampleTimes);
+
+
+#pragma omp parallel for collapse(2)
     for (int i = 0; i < ny; ++i) {
         for (int j = 0; j < nx; ++j) {
             if (verbose) printf("pixel %d %d\n", i, j);
@@ -30,13 +36,24 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
             unsigned long blue = 0;
             unsigned long green = 0;
             unsigned long red = 0;
+            /*
+             * generate sample points
+             */
+            for (int i = 0; i < sampleTimes; ++i) {
+                sampleXs[i] = random();
+                sampleYs[i] = random();
+                cameraXs[i] = random();
+                cameraYs[i] = random();
+            }
+            shuffle(cameraXs);
+            shuffle(cameraYs);
 
             #pragma omp parallel for
             for (int k = 0; k < sampleTimes; k++) {
-                auto u = l + (r - l) * (i + random()) / ny;
-                auto v = b + (t - b) * (j + random()) / nx;
+                auto u = l + (r - l) * (i + sampleXs[k]) / ny;
+                auto v = b + (t - b) * (j + sampleYs[k]) / nx;
                 auto direction = -d * ww + u * uu + v * vv;
-                auto ray = Ray(cam.randomEye(), direction);
+                auto ray = Ray(cam.randomEye(cameraXs[k], cameraYs[k]), direction);
                 Color color = rayTracing(ray);
                 blue += color[0];
                 green += color[1];
