@@ -365,7 +365,7 @@ Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
     Vec f = Vec(material.color[0]/255., material.color[1]/255., material.color[2]/255.);
 
     double p = std::max(f[0], std::max(f[1], f[2]));
-    if (depth > 8) {
+    if (depth > 5) {
         if (std::abs(random()) < p) {
             f = f * (1/p);
         } else {
@@ -439,7 +439,7 @@ Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
         double cosTheta = dir.ddot(n);
         Vec BRDF;
         for (int i = 0; i < 3; ++i) {
-            BRDF[i] = (1./255.) * 2 * f[i] * cosTheta;
+            BRDF[i] = 2 * f[i] * cosTheta;
         }
         Vec reflected = pathTracing(newRay, depth+1, 0.0001);
         for (int i = 0; i < 3; ++i) {

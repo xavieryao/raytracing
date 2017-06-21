@@ -31,7 +31,6 @@ int main() {
     mirmat.color = Color(73,85,132);
 
 
-    randMaterials[3].emission = Vec(2200, 2200, 2200);
 
     randMaterials[0].color = Color(0, 140, 255);
     randMaterials[1].color = Color(200, 30, 40);
@@ -46,7 +45,7 @@ int main() {
     Plane* top = new Plane(Vec(0, -1, 0), 13, randMaterials[4], "top");
     Plane* back = new Plane(Vec(0, 0, -1), 30, randMaterials[6], "back");
 
-    randMaterials[5].emission = Vec(800, 800, 800);
+    randMaterials[5].emission = Vec(2800, 2800, 2800);
     Rectangle* led = new Rectangle(Vec(0, -1, 0), 13, Vec(-6, 13, 4), Vec(6, 0, 0), Vec(0, 0, 6), randMaterials[5], "led");
     Rectangle* led2 = new Rectangle(Vec(0, -1, 0), 13, Vec(6, 13, 5), Vec(-6, 0, 0), Vec(0, 0, -6), randMaterials[5], "led");
 
