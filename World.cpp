@@ -21,16 +21,14 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
     auto& vv = cam.v;
     auto& ww = cam.w;
 
-
-    std::vector<double> sampleXs(sampleTimes);
-    std::vector<double> sampleYs(sampleTimes);
-    std::vector<double> cameraXs(sampleTimes);
-    std::vector<double> cameraYs(sampleTimes);
-
-
-#pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2), schedule(dynamic, 1)
     for (int i = 0; i < ny; ++i) {
         for (int j = 0; j < nx; ++j) {
+            std::vector<double> sampleXs(sampleTimes);
+            std::vector<double> sampleYs(sampleTimes);
+            std::vector<double> cameraXs(sampleTimes);
+            std::vector<double> cameraYs(sampleTimes);
+
             if (verbose) printf("pixel %d %d\n", i, j);
 
             unsigned long blue = 0;
@@ -68,7 +66,7 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
     /*
      * save image
      */
-    auto filename = "/Users/xavieryao/cg/rt/" + name + ".png";
+    auto filename = "/Users/xavieryao/cg/rt/focus/" + name + ".png";
     cv::imwrite(filename, mat);
 }
 
@@ -98,6 +96,7 @@ World::World(Color bgColor, double aIntensity, std::string name) {
     this->name = name;
     this->aIntensity = aIntensity;
     this->bgColor = bgColor;
+    this->verbose = false;
 }
 
 Color World::rayTracing(Ray &ray, int depth, double epsilon){
@@ -287,4 +286,133 @@ bool World::refract(Vec &d, Vec &n, double nt, Vec &t){
 
 void World::printColor(Color &c) {
     printf("(%d %d %d)\n", c[0], c[1], c[2]);
+}
+
+/*
+ * render with brute force path tracing
+ */
+void World::renderPT(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes) {
+    auto mat = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
+
+    auto& uu = cam.u;
+    auto& vv = cam.v;
+    auto& ww = cam.w;
+
+#pragma omp parallel for collapse(2), schedule(dynamic, 1)
+    for (int i = 0; i < ny; ++i) {
+        for (int j = 0; j < nx; ++j) {
+            std::vector<double> sampleXs(sampleTimes);
+            std::vector<double> sampleYs(sampleTimes);
+            std::vector<double> cameraXs(sampleTimes);
+            std::vector<double> cameraYs(sampleTimes);
+
+            if (verbose) printf("pixel %d %d\n", i, j);
+
+            double blue = 0;
+            double green = 0;
+            double red = 0;
+
+            shuffle(cameraXs);
+            shuffle(cameraYs);
+
+#pragma omp parallel for
+            for (int k = 0; k < sampleTimes; k++) {
+                auto u = l + (r - l) * (i + random()) / ny;
+                auto v = b + (t - b) * (j + random()) / nx;
+                auto direction = -d * ww + u * uu + v * vv;
+                auto ray = Ray(cam.eye, direction);
+                Vec emission = pathTracing(ray);
+                blue += emission[0];
+                green += emission[1];
+                red += emission[2];
+            }
+
+            blue /= sampleTimes;
+            green /= sampleTimes;
+            red /= sampleTimes;
+
+            if (blue < 0.) blue = 0.;
+            if (green < 0.) green = 0.;
+            if (red < 0.) red = 0.;
+            if (blue > 1.) blue = 1.;
+            if (green > 1.) green = 1.;
+            if (red > 1.) red = 1.;
+
+            Color color = Color(static_cast<uchar>(blue * 255), static_cast<uchar>(green * 255),
+                                static_cast<uchar>(red * 255));
+            mat.at<Color>(j, i) = color;
+        }
+    }
+
+    /*
+     * save image
+     */
+    auto filename = "/Users/xavieryao/cg/pt/" + name + ".png";
+    cv::imwrite(filename, mat);
+}
+
+Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
+    if (depth == 0) {
+        return Vec(0, 0, 0);
+    }
+
+
+    double t;
+    Object *object = hit(t, ray, epsilon);
+    if (object == nullptr) {
+        return Vec(0, 0, 0);
+    }
+
+    Vec intersection = ray.origin + t * ray.direction;
+    Vec n = object->normalVector(intersection);
+    Vec v = normalize(ray.origin - intersection);
+    Vec d = normalize(ray.direction);
+
+    if (verbose) {
+        printf("交点 "); printVec(intersection);
+        printf("法线 "); printVec(n);
+        printf("视线 "); printVec(v);
+    }
+
+    Material& material = object->material;
+    Vec emmittance = material.emission;
+    Vec randomDir = cosineRandomUnitVec(n);
+    Ray newRay(intersection, randomDir);
+
+    double cosTheta = randomDir.ddot(n);
+    Vec BRDF;
+    for (int i = 0; i < 3; ++i) {
+        BRDF[i] = (1./255.) * 2 * material.color[i] * cosTheta;
+    }
+    Vec reflected = pathTracing(newRay, depth+1, 0.0001);
+    for (int i = 0; i < 3; ++i) {
+        emmittance[i] += BRDF[i] * reflected[i];
+    }
+    return emmittance;
+
+    /*
+     * ideal specular reflection
+     */
+//    if (material.km != .0) {
+//        Vec emission = object->material.emission;
+//        Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
+//        Ray mirrorRay(intersection, r);
+//        Vec reflectEmission = pathTracing(mirrorRay, depth-1, 0.001);
+//        emission += object->material.km*reflectEmission;
+//        return emission;
+//    }
+//    assert(object->material.km == 0);
+//     end ideal specular reflection
+//
+    /*
+     * diffusion
+     */
+//    Vec emission = object->material.emission;
+//    Vec randomDir = cosineRandomUnitVec(n);
+//    Ray reflectRay(intersection, randomDir);
+//    Vec reflectEmission = pathTracing(reflectRay, depth-1, 0.001);
+//    for (int i = 0; i < 3; ++i) {
+//        emission[i] += object->material.color[i] * reflectEmission[i];
+//    }
+//    return emission;
 }

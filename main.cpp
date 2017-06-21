@@ -9,16 +9,24 @@ int main() {
     std::cout << "Hello, World!" << std::endl;
     srand(static_cast<unsigned int>(3847524325));
 
+
+    cv::Vec3d color(100, 123, 5);
+    cv::Vec3d em(1.5, 1.7, 2.0);
+    cv::Vec3d output = color*em;
+    printf("%f %f %f", output[0], output[1], output[2]);
+
+
     Material m1;
     m1.color = Color(100, 123, 5);
     m1.ks = Color(230, 230, 230);
     m1.ka = 0.9*m1.color;
     m1.p = 100;
-    m1.dielectric = true;
+    m1.dielectric = false;
     m1.ab = 0.00001;
     m1.ag = 0.00001;
     m1.ar = 0.00001;
     m1.nt = 1.05;
+    m1.emission = Vec(50, 51, 51);
 
     Material randMaterials[10];
     for (int i = 0; i < 10; ++i) {
@@ -67,19 +75,23 @@ int main() {
 //    w.addObject(top);
 //    w.addObject(back);
 
-    constexpr int size = 1000;
+    constexpr int size = 300;
     constexpr int frame = 15;
 
     Camera cam(Vec(0, 1, -5));
     cam.pitch(10);
 
-    double focus = 0.00000001;
+    double focus = 0.001;
+    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 25600);
+
+    /*
     for (int i = 0; i < 25; i++) {
         cam.focus = focus;
         w.setName(std::to_string(focus));
         w.render(-frame, frame, -frame, frame, 9, size, size, cam, 16);
         focus *= 2;
     }
+     */
 
     return 0;
 }

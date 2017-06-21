@@ -17,6 +17,7 @@ struct Material {
     bool dielectric;
     double ar, ag, ab; /* RGB refraction factor */
     double nt; /* refractive index */
+    cv::Vec3d emission; /*emission, for global illumination*/
 
     Material() : ks(cv::Vec3b(255, 255, 255)), p(100) {}
 
@@ -27,6 +28,7 @@ struct Material {
         this->p = p;
         this->km = km;
         this->dielectric = false;
+        this->emission = cv::Vec3d(0, 0, 0);
     }
 
     static Material randomMaterial() {
