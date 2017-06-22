@@ -9,7 +9,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/opt/llvm/lib 
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-set(SOURCE_FILES main.cpp Ray.h Objects.h Objects.cpp World.cpp World.h Light.h Material.h Camera.h)
+set(SOURCE_FILES main.cpp Ray.h Objects.h Objects.cpp World.cpp World.h Light.h Material.h Camera.h KDNode.cpp KDNode.h AABB.h)
 add_executable(raytracing ${SOURCE_FILES})
 
 target_link_libraries(raytracing ${OpenCV_LIBS} )
