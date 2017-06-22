@@ -10,9 +10,15 @@ int main() {
     srand(static_cast<unsigned int>(534599119));
 
 
+    Color c = Color(100, 123, 5);
+    Vec cv = World::color2vec(c);
+    cv *= 5;
+    World::printColor(cv);
+
     Material m1;
     m1.color = Color(100, 123, 5);
     m1.ks = Color(230, 230, 230);
+//    m1.emission = Vec(100, 100, 100);
     m1.ka = 0.9*m1.color;
     m1.p = 100;
     m1.dielectric = false;
@@ -45,7 +51,7 @@ int main() {
     Plane* top = new Plane(Vec(0, -1, 0), 13, randMaterials[4], "top");
     Plane* back = new Plane(Vec(0, 0, -1), 30, randMaterials[6], "back");
 
-    randMaterials[5].emission = Vec(2800, 2800, 2800);
+    randMaterials[5].emission = Vec(200, 200, 200);
     Rectangle* led = new Rectangle(Vec(0, -1, 0), 13, Vec(-6, 13, 4), Vec(6, 0, 0), Vec(0, 0, 6), randMaterials[5], "led");
     Rectangle* led2 = new Rectangle(Vec(0, -1, 0), 13, Vec(6, 13, 5), Vec(-6, 0, 0), Vec(0, 0, -6), randMaterials[5], "led");
 
@@ -74,14 +80,14 @@ int main() {
     w.addObject(right);
     w.addObject(ground);
 
-    constexpr int size = 200;
+    constexpr int size = 500;
     constexpr int frame = 23;
 
     Camera cam(Vec(0, 1, -5));
     cam.pitch(10);
 
     double focus = 0.001;
-    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 20);
+    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 200);
 
     /*
     for (int i = 0; i < 25; i++) {

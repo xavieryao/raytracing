@@ -28,7 +28,7 @@ struct Material {
         this->p = p;
         this->km = km;
         this->dielectric = false;
-        this->emission = cv::Vec3d(0, 0, 0);
+        this->emission = cv::Vec3b(0, 0, 0);
     }
 
     static Material randomMaterial() {
@@ -45,6 +45,8 @@ struct Material {
         Material m(color, ks, ka, 0, rand()%150);
         return m;
     }
+
+
 };
 
 

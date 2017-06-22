@@ -67,6 +67,25 @@ private:
         return Vec(a[1]*b[2] - a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]);
     }
 
+
+
+    static Vec vec2color(Vec v) {
+        Color c;
+        for (int i = 0; i < 3; ++i) {
+            double s = (v[i] > 1) ? 1. : (v[i] < 0 ? 0. : v[i]);
+            c[i] = uchar(std::pow(s, 1/2.2)*255 + 0.5);
+        }
+        return c;
+    }
+
+    static Vec saturate(Vec v) {
+        Vec r;
+        for (int i = 0; i < 3; i++ ){
+            r[i] = (v[i] > 1) ? 1. : (v[i] < 0 ? 0. : v[i]);
+        }
+        return r;
+    }
+
 public:
     World(Color bgColor = Color(255,255,255), double aIntensity = 0, std::string name="Brave New World");
     std::string getName() ;
@@ -75,6 +94,12 @@ public:
     void addLightSource(Light* l);
     void render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes=9);
     void renderPT(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes=9);
+
+    static Vec color2vec(Color c) {
+        return Vec(c[0]/255., c[1]/255., c[2]/255.);
+    }
+    static void printColor(Vec& c);
+
 
     ~World();
 };
