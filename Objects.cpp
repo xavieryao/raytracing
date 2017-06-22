@@ -123,55 +123,42 @@ Rectangle::Rectangle(cv::Vec3d n, double d, cv::Vec3d corner, cv::Vec3d edge1, c
 }
 
 double Triangle::intersect(Ray ray) const {
-    if (!aabb.intersect(ray)) {
+    cv::Vec3d edge1 = v1 - v0;
+    cv::Vec3d edge2 = v2 - v0;
+
+    cv::Vec3d triNorm = normalVector(ray.direction.cross(edge2));
+    double vn = ray.direction.ddot(triNorm);
+
+    cv::Vec3d aa = ray.origin - v0;
+    double xpn = aa.ddot(triNorm);
+    double t = -xpn/vn;
+
+    if (t < 0.0000001) {
         return -1;
     }
-    // compute plane's normal
-    cv::Vec3d v0v1 = v1 - v0;
-    cv::Vec3d v0v2 = v2 - v0;
-    // no need to normalize
-    cv::Vec3d N = v0v1.cross(v0v2); // N
-    double area2 = cv::norm(N);
 
-    // Step 1: finding P
+    cv::Vec3d hitPos = ray.origin + t*ray.direction;
+    cv::Vec3d hit00 = hitPos - v0;
+    cv::Vec3d cross0 = hit00.cross(edge1);
+    if (cross0.ddot(triNorm) > 0.00000001) return -1;
 
-    // check if ray and plane are parallel ?
-    double NdotRayDirection = N.ddot(ray.direction);
-    if (fabs(NdotRayDirection) < 0.0000001f) // almost 0
-        return false; // they are parallel so they don't intersect ! 
+    cv::Vec3d hit10 = hitPos - v1;
+    cv::Vec3d hit11 = v2 - v1;
+    cv::Vec3d cross1 = hit10.cross(hit11);
+    if (cross1.dot(triNorm) > 0.00000001) return -1;
 
-    // compute d parameter using equation 2
-    double d = N.ddot(v0);
+    cv::Vec3d hit20 = hitPos - v2;
+    cv::Vec3d hit21 = v0 - v2;
+    cv::Vec3d cross2 = hit20.cross(hit21);
+    if (cross2.ddot(triNorm) > 0.00000001) return -1;
 
-    // compute t (equation 3)
-    double t = (N.ddot(ray.origin) + d) / NdotRayDirection;
-    // check if the triangle is in behind the ray
-    if (t < 0) return -1; // the triangle is behind
 
-    // compute the intersection point using equation 1
-    cv::Vec3d P = ray.origin + t * ray.direction;
+    cv::Vec3d P = ray.origin + t*ray.direction;
 
-    // Step 2: inside-outside test
-    cv::Vec3d C; // vector perpendicular to triangle's plane
-
-    // edge 0
-    cv::Vec3d edge0 = v1 - v0;
-    cv::Vec3d vp0 = P - v0;
-    C = edge0.cross(vp0);
-    if (N.ddot(C) < 0) return -1; // P is on the right side
-
-    // edge 1
-    cv::Vec3d edge1 = v2 - v1;
-    cv::Vec3d vp1 = P - v1;
-    C = edge1.cross(vp1);
-    if (N.ddot(C) < 0)  return -1; // P is on the right side
-
-    // edge 2
-    cv::Vec3d edge2 = v0 - v2;
-    cv::Vec3d vp2 = P - v2;
-    C = edge2.cross(vp2);
-    if (N.ddot(C) < 0) return -1; // P is on the right side;
-
+    if (t > 0) {
+        printf("%f %f %f %f\n", P[0], P[1], P[2], t);
+//        assert(aabb.intersect(ray));
+    }
     return t;
 }
 
@@ -193,16 +180,13 @@ Triangle::Triangle(cv::Vec3d v0, cv::Vec3d v1, cv::Vec3d v2) {
     this->v0 = v0;
     this->v1 = v1;
     this->v2 = v2;
-    cv::Vec3d min = v0;
-    cv::Vec3d max = v0;
-    for (int i = 0; i < 3; ++i) {
-        if (v0[i] < min[i]) min[i] = v0[i];
-        if (v1[i] < min[i]) min[i] = v1[i];
-        if (v2[i] < min[i]) min[i] = v2[i];
-        if (v0[i] > max[i]) max[i] = v0[i];
-        if (v1[i] > max[i]) max[i] = v1[i];
-        if (v2[i] > max[i]) max[i] = v2[i];
-    }
+    cv::Vec3d min = cv::Vec3d(std::min(v0[0], std::min(v1[0], v2[0])), std::min(v0[1], std::min(v1[1], v2[1]))
+            , std::min(v0[2], std::min(v1[2], v2[2])));
+    cv::Vec3d max = cv::Vec3d(std::max(v0[0], std::max(v1[0], v2[0])), std::max(v0[1], std::max(v1[1], v2[1]))
+            , std::max(v0[2], std::max(v1[2], v2[2])));
+
+//    min = cv::Vec3d(4, 2, 1);
+//    max = cv::Vec3d(6, 7, 8);
     this->aabb = AABB(min, max);
 }
 

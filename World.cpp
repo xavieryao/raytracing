@@ -106,6 +106,10 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         return bgColor;
     }
 
+    if (object->name == "triangle") {
+        printf("triangle\n");
+    }
+
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
@@ -215,6 +219,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         lt = normalize(lt);
         Ray shadowRay(intersection, lt);
 
+
         double s;
         if (!hit(s, shadowRay, 0.01, max)) {
             Vec h = normalize(v + lt);
@@ -223,6 +228,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
             color += object->material.color * light->intensity * std::max(0.0, a);
             color += object->material.ks * light->intensity * std::pow(std::max(0.0, b), object->material.p);
         }
+
     }
 
     /*
@@ -255,6 +261,9 @@ Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
             printf("对物体 %s\n", obj->name.c_str());
             printf("tt=%f\n", tt);
         }
+        if (obj->name == "triangle" && tt > 0 && tt < t) {
+            printf("%f %f\n", t, tt);
+        }
         if (tt > epsilon && tt < t && tt < max) {
             t = tt;
             object = obj;
@@ -264,6 +273,7 @@ Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
         }
     }
 
+    /*
     double tt = -1;
     Triangle* tri = nullptr;
     for (auto kdtree: kdtrees) {
@@ -273,7 +283,7 @@ Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
                 object = tri;
             }
         }
-    }
+    }*/
 
     return object;
 }
@@ -370,6 +380,7 @@ Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
     if (object == nullptr) {
         return color2vec(bgColor);
     }
+
 
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
