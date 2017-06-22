@@ -86,8 +86,8 @@ int main() {
     w.addObject(right);
     w.addObject(ground);
 
-    w.addObject(triangle);
-//    w.addKDTree(kdtree);
+//    w.addObject(triangle);
+    w.addKDTree(kdtree);
 
     constexpr int size = 500;
     constexpr int frame = 23;

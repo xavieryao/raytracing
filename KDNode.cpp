@@ -84,7 +84,7 @@ bool KDNode::hit(const Ray &ray, double &t, Triangle*& tri) const {
         tri = nullptr;
         double min_t = INT_MAX;
         for (auto triangle: triangles) {
-            double tt = tri->intersect(ray);
+            double tt = triangle->intersect(ray);
             if (tt > 0 && tt < min_t) {
                 tri = triangle;
                 min_t = tt;
