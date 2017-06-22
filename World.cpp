@@ -117,6 +117,9 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
     Vec d = normalize(ray.direction);
+    if (n.ddot(v) < 0) {
+        n = -n;
+    }
 
     if (verbose) {
         printf("交点 "); printVec(intersection);

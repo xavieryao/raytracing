@@ -23,11 +23,23 @@ int main() {
 //    m1.emission = Vec(100, 100, 100);
     m1.ka = 0.9*m1.color;
     m1.p = 100;
-    m1.dielectric = false;
+    m1.dielectric = true;
     m1.ab = 0.00001;
     m1.ag = 0.00001;
     m1.ar = 0.00001;
     m1.nt = 1.07;
+
+    Material m2;
+    m2.color = Color(100, 123, 5);
+    m2.ks = Color(230, 230, 230);
+//   2m1.emission = Vec(100, 100, 100);
+    m2.ka = 0.9*m1.color;
+    m2.p = 100;
+    m2.dielectric = true;
+    m2.ab = 0.1;
+    m2.ag = 0.001;
+    m2.ar = 0.001;
+    m2.nt = 1.17;
 
     Material randMaterials[10];
     for (int i = 0; i < 10; ++i) {
@@ -41,6 +53,7 @@ int main() {
 
 
     randMaterials[0].color = Color(0, 140, 255);
+    randMaterials[0].p = 200;
     randMaterials[1].color = Color(200, 30, 40);
     randMaterials[2].color = Color(20, 30, 180);
     randMaterials[4].color = Color(150, 40, 180);
@@ -70,7 +83,7 @@ int main() {
     Sphere* distantSp = new Sphere(Vec(-8, 8, 20), 5, material, "distantSp");
 
     auto triangle = new Triangle(Vec(5,0,5), Vec(10,10,4), Vec(15,0,3));
-    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh.obj", Vec(5, 0, 20), 0.1, randMaterials[2]);
+    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh.obj", Vec(5, 0, 10), 0.08, m2);
 //    for (auto tri: tris) {
 //        w.addObject(tri);
 //    }
@@ -91,29 +104,29 @@ int main() {
     w.addLightSource(light);
     w.addLightSource(light2);
 
-//    w.addObject(sp);
-//    w.addObject(anotherSp);
-//    w.addObject(distantSp);
-//    w.addObject(led);
-//    w.addObject(top);
-//    w.addObject(back);
-//    w.addObject(left);
-//    w.addObject(right);
-//    w.addObject(ground);
+    w.addObject(sp);
+    w.addObject(anotherSp);
+    w.addObject(distantSp);
+    w.addObject(led);
+    w.addObject(top);
+    w.addObject(back);
+    w.addObject(left);
+    w.addObject(right);
+    w.addObject(ground);
 
 //    w.addObject(triangle);
 
     w.addKDTree(kdtree);
 
-    constexpr int size = 200;
+    constexpr int size = 500;
 
-    constexpr int frame = 23;
+    constexpr int frame = 20;
 
-    Camera cam(Vec(0,2,-10));
-    cam.pitch(-10);
+    Camera cam(Vec(0,-2,-6));
+    cam.pitch(10);
 
     double focus = 0.001;
-    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 5);
+    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 16);
 
     /*
     for (int i = 0; i < 25; i++) {
