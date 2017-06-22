@@ -67,8 +67,8 @@ int main() {
     material.km = 0;
     Sphere* distantSp = new Sphere(Vec(-8, 8, 20), 5, material, "distantSp");
 
-    auto triangle = new Triangle(Vec(6, 7 ,8), Vec(3,4,5), Vec(4, 2, 1));
-    triangle->material = randMaterials[7];
+    auto triangle = new Triangle(Vec(5,0,5), Vec(10,10,4), Vec(15,0,3));
+    triangle->material = randMaterials[2];
     std::vector<Triangle* > tris;
     tris.push_back(triangle);
     auto kdtree = KDNode::build(tris, 0);
@@ -92,8 +92,8 @@ int main() {
     constexpr int size = 500;
     constexpr int frame = 23;
 
-    Camera cam(Vec(0, 1, -5));
-    cam.pitch(10);
+    Camera cam(Vec(0,2,-10));
+    cam.pitch(-10);
 
     double focus = 0.001;
     w.render(-frame, frame, -frame, frame, 9, size, size, cam, 5);

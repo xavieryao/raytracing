@@ -123,55 +123,19 @@ Rectangle::Rectangle(cv::Vec3d n, double d, cv::Vec3d corner, cv::Vec3d edge1, c
 }
 
 double Triangle::intersect(Ray ray) const {
-    if (!aabb.intersect(ray)) {
-        return -1;
-    }
-    // compute plane's normal
-    cv::Vec3d v0v1 = v1 - v0;
-    cv::Vec3d v0v2 = v2 - v0;
-    // no need to normalize
-    cv::Vec3d N = v0v1.cross(v0v2); // N
-    double area2 = cv::norm(N);
+    auto edge1 = v1 - v0;
+    auto edge2 = v2 - v0;
+    auto pvec = ray.direction.cross(edge2);
+    auto det = edge1.ddot(pvec);
 
-    // Step 1: finding P
-
-    // check if ray and plane are parallel ?
-    double NdotRayDirection = N.ddot(ray.direction);
-    if (fabs(NdotRayDirection) < 0.0000001f) // almost 0
-        return false; // they are parallel so they don't intersect ! 
-
-    // compute d parameter using equation 2
-    double d = N.ddot(v0);
-
-    // compute t (equation 3)
-    double t = (N.ddot(ray.origin) + d) / NdotRayDirection;
-    // check if the triangle is in behind the ray
-    if (t < 0) return -1; // the triangle is behind
-
-    // compute the intersection point using equation 1
-    cv::Vec3d P = ray.origin + t * ray.direction;
-
-    // Step 2: inside-outside test
-    cv::Vec3d C; // vector perpendicular to triangle's plane
-
-    // edge 0
-    cv::Vec3d edge0 = v1 - v0;
-    cv::Vec3d vp0 = P - v0;
-    C = edge0.cross(vp0);
-    if (N.ddot(C) < 0) return -1; // P is on the right side
-
-    // edge 1
-    cv::Vec3d edge1 = v2 - v1;
-    cv::Vec3d vp1 = P - v1;
-    C = edge1.cross(vp1);
-    if (N.ddot(C) < 0)  return -1; // P is on the right side
-
-    // edge 2
-    cv::Vec3d edge2 = v0 - v2;
-    cv::Vec3d vp2 = P - v2;
-    C = edge2.cross(vp2);
-    if (N.ddot(C) < 0) return -1; // P is on the right side;
-
+    if (det < 0.00001) return -1;
+    auto tvec = ray.origin - v0;
+    auto u = tvec.ddot(pvec);
+    if (u < 0 || u > det) return -1;
+    auto qvec = tvec.cross(edge1);
+    double v = ray.direction.dot(qvec);
+    if (v < 0 || u+v > det) return -1;
+    double t = edge2.ddot(qvec) / det;
     return t;
 }
 
@@ -180,8 +144,8 @@ cv::Vec3d Triangle::normalVector(cv::Vec3d point) const {
     cv::Vec3d v0v1 = v1 - v0;
     cv::Vec3d v0v2 = v2 - v0;
     // no need to normalize
-    cv::Vec3d N = v0v1.cross(v0v2); // N
-    N = N/cv::norm(N);
+    cv::Vec3d N = cv::normalize(v0v1.cross(v0v2)); // N
+//    N = -N/cv::norm(N);
     return N;
 }
 
