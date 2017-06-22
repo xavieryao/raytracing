@@ -60,15 +60,14 @@ int main() {
     Light* light = new Light(cv::Vec3d(-8, 10, -2), cv::Vec3d(-0.03, 0.02, 0.02), cv::Vec3d(0.015, 0.02, 0.02), 1.5);
     Light* light2 = new Light(cv::Vec3d(8, 10, -2), cv::Vec3d(0.12, 0.12, 0.12), cv::Vec3d(0.023, 0.02, 0.02), 1.5);
 
-    Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, mirmat, "sp");
+    Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, m1, "sp");
     Sphere* anotherSp = new Sphere(Vec(3, 3, 5), 4, mirmat, "another_sp");
 
     Material material = randMaterials[9];
     material.km = 0;
     Sphere* distantSp = new Sphere(Vec(-8, 8, 20), 5, material, "distantSp");
 
-    auto triangle = new Triangle(cv::Vec3d(1, 1, 1), cv::Vec3d(100, 100, 100), Vec(5, 8, 7));
-    triangle->name = "triangle";
+    auto triangle = new Triangle(Vec(6, 7 ,8), Vec(3,4,5), Vec(4, 2, 1));
     triangle->material = randMaterials[7];
     std::vector<Triangle* > tris;
     tris.push_back(triangle);
@@ -91,17 +90,13 @@ int main() {
 //    w.addKDTree(kdtree);
 
     constexpr int size = 500;
-    constexpr int frame = 25;
+    constexpr int frame = 23;
 
-    Camera cam(Vec(0, 0, -5));
-//    cam.(10);
-    for (int j = 0; j < 15; ++j) {
-        cam.yaw(j*10);
-        w.setName(std::to_string(j));
-        w.render(-frame, frame, -frame, frame, 9, size, size, cam, 5);
-    }
+    Camera cam(Vec(0, 1, -5));
+    cam.pitch(10);
 
     double focus = 0.001;
+    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 5);
 
     /*
     for (int i = 0; i < 25; i++) {
