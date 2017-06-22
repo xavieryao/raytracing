@@ -69,7 +69,7 @@ private:
 
 
 
-    static Vec vec2color(Vec v) {
+    static Color vec2color(Vec v) {
         Color c;
         for (int i = 0; i < 3; ++i) {
             double s = (v[i] > 1) ? 1. : (v[i] < 0 ? 0. : v[i]);

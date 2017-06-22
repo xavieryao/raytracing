@@ -80,14 +80,14 @@ int main() {
     w.addObject(right);
     w.addObject(ground);
 
-    constexpr int size = 500;
+    constexpr int size = 1000;
     constexpr int frame = 23;
 
     Camera cam(Vec(0, 1, -5));
     cam.pitch(10);
 
     double focus = 0.001;
-    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 200);
+    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 100);
 
     /*
     for (int i = 0; i < 25; i++) {
