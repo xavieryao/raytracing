@@ -6,6 +6,8 @@
 #include "World.h"
 
 int main() {
+
+
     std::cout << "Hello, World!" << std::endl;
     srand(static_cast<unsigned int>(534599119));
 
@@ -68,10 +70,19 @@ int main() {
     Sphere* distantSp = new Sphere(Vec(-8, 8, 20), 5, material, "distantSp");
 
     auto triangle = new Triangle(Vec(5,0,5), Vec(10,10,4), Vec(15,0,3));
-    triangle->material = randMaterials[2];
-    std::vector<Triangle* > tris;
-    tris.push_back(triangle);
-    auto kdtree = KDNode::build(tris, 0);
+//    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh.obj", Vec(5, 0, 5), 0.16, randMaterials[2]);
+//    Triangle* triangle = tris[1];
+//    triangle->material = randMaterials[2];
+//    tris.push_back(triangle);
+//    std::vector<Triangle*> triss;
+//    triss.push_back(triangle);
+//    triss.push_back(tris[1]);
+//    auto kdtree = KDNode::build(triss, 0);
+
+    printf("tri a"); World::printVec(triangle->v0);
+    printf("tri b"); World::printVec(triangle->v1);
+    printf("tri c"); World::printVec(triangle->v2);
+
 
     w.addLightSource(light);
     w.addLightSource(light2);
@@ -86,8 +97,9 @@ int main() {
     w.addObject(right);
     w.addObject(ground);
 
-//    w.addObject(triangle);
-    w.addKDTree(kdtree);
+    w.addObject(triangle);
+
+//    w.addKDTree(kdtree);
 
     constexpr int size = 500;
     constexpr int frame = 23;

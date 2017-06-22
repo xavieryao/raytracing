@@ -174,3 +174,31 @@ Triangle::Triangle(cv::Vec3d v0, cv::Vec3d v1, cv::Vec3d v2) {
 void Triangle::repr() const {
 
 }
+
+std::vector<Triangle*> Triangle::loadMeshes(const std::string& filename, const cv::Vec3d zero,
+                                            const double scale, const Material& m) {
+    std::vector<cv::Vec3d> points;
+    std::vector<Triangle*> triangles;
+    freopen(filename.c_str(), "r", stdin);
+    char type;
+    while ((type = (char) getchar()) && type != EOF) {
+        if (! (type == 'v' || type == 'f')) {
+            type = (char) getchar();
+            if (type == EOF) break;
+        }
+        if (type == 'v') {
+            float a, b, c;
+            scanf("%f %f %f", &a, &b, &c);
+            cv::Vec3d pt(cv::Vec3d((double) a, (double) b, (double) c));
+            pt = zero + pt*scale;
+            points.push_back(pt);
+        } else if (type == 'f') {
+            int a, b, c;
+            scanf("%d %d %d", &a, &b, &c);
+            Triangle* tri = new Triangle(points[a-1], points[b-1], points[c-1]);
+            tri->material = m;
+            triangles.push_back(tri);
+        }
+    }
+    return triangles;
+}

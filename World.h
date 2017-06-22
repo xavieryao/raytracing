@@ -35,7 +35,6 @@ private:
     Vec pathTracing(Ray& ray, int depth=0, double epsilon = .0);
     Object* hit(double& t, Ray& ray, double epsilon = .0, double max = INT_MAX);
     static Vec normalize(Vec v);
-    static void printVec(Vec& v);
     static void printColor(Color& c);
     static double random() {
         constexpr double HALF_RANGE = 1;
@@ -102,7 +101,7 @@ public:
         return Vec(c[0]/255., c[1]/255., c[2]/255.);
     }
     static void printColor(Vec& c);
-
+    static void printVec(Vec& v);
 
     ~World();
 };

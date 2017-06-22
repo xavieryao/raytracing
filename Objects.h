@@ -8,6 +8,7 @@
 #include "Ray.h"
 #include "Material.h"
 #include <cstdio>
+#include <fstream>
 #include <cmath>
 #include <algorithm>
 #include "AABB.h"
@@ -66,13 +67,15 @@ public:
 
 class Triangle : public Object {
 private:
-    cv::Vec3d v0, v1, v2;
 public:
+    cv::Vec3d v0, v1, v2;
+
     Triangle(cv::Vec3d v0, cv::Vec3d v1, cv::Vec3d v2);
     cv::Vec3d getMidPoint() const;
     virtual double intersect(Ray ray) const override;
     virtual cv::Vec3d normalVector(cv::Vec3d point) const override;
     void repr() const override;
+    static std::vector<Triangle*> loadMeshes(const std::string& filename, const cv::Vec3d zero, const double scale, const Material& m);
 };
 
 #endif //RAYTRACING_OBJECT_H
