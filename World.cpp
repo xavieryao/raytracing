@@ -48,11 +48,18 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
 
             #pragma omp parallel for
             for (int k = 0; k < sampleTimes; k++) {
+                verbose = (i == 19 && j == 112 && k==1);
+                if (i == 19 && j == 112 && k==1) {
+                    verbose = true;
+                }
                 auto u = l + (r - l) * (i + sampleXs[k]) / ny;
                 auto v = b + (t - b) * (j + sampleYs[k]) / nx;
                 auto direction = -d * ww + u * uu + v * vv;
                 auto ray = Ray(cam.randomEye(cameraXs[k], cameraYs[k]), direction);
                 Color color = rayTracing(ray);
+                if (i == 19 && j == 112 && k==1) {
+                    printf("%d %d %d\n", color[0], color[1], color[2]);
+                }
                 blue += color[0];
                 green += color[1];
                 red += color[2];
@@ -114,7 +121,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
     if (verbose) {
         printf("交点 "); printVec(intersection);
         printf("法线 "); printVec(n);
-        printf("实现 "); printVec(v);
+        printf("视线 "); printVec(v);
     }
 
     /*
@@ -215,6 +222,9 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         lt = normalize(lt);
         Ray shadowRay(intersection, lt);
 
+        if (verbose) {
+            printf("shadow\n");
+        }
         double s;
         if (!hit(s, shadowRay, 0.01, max)) {
             Vec h = normalize(v + lt);
@@ -267,11 +277,18 @@ Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
     double tt = -1;
     Triangle* tri = nullptr;
 
+    if (verbose) {
+        //debug
+    }
+
     for (auto kdtree: kdtrees) {
         if (kdtree->hit(ray, tt, tri)) {
-            if (tt < t) {
+            if (tt > epsilon && tt < t && tt < max) {
                 t = tt;
                 object = tri;
+                if (verbose) {
+                    printf("kd tree hit\n");
+                }
             }
         }
     }
