@@ -50,11 +50,20 @@ struct AABB {
     }
 
     void expand(AABB& box) {
-
+        for (int i = 0; i < 3; ++i) {
+            if (box.bounds[0][i] < bounds[0][i]) bounds[0][i] = box.bounds[0][i];
+            if (box.bounds[1][i] > bounds[1][i]) bounds[1][i] = box.bounds[1][i];
+        }
     }
 
     int longestAxis() {
-        return 0;
+        double ax0 = std::abs(bounds[1][0] - bounds[0][0]);
+        double ax1 = std::abs(bounds[1][1] - bounds[0][1]);
+        double ax2 = std::abs(bounds[1][2] - bounds[0][2]);
+
+        if (ax0 >= ax1 && ax0 >= ax2) return 0;
+        if (ax1 >= ax2 && ax1 >= ax0) return 1;
+        else return 2;
     }
 };
 

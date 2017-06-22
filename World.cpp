@@ -268,6 +268,7 @@ Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
     Triangle* tri = nullptr;
     for (auto kdtree: kdtrees) {
         if (kdtree->hit(ray, tt, tri)) {
+            printf("hit\n");
             if (tt < t) {
                 t = tt;
                 object = tri;

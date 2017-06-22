@@ -123,6 +123,7 @@ Rectangle::Rectangle(cv::Vec3d n, double d, cv::Vec3d corner, cv::Vec3d edge1, c
 }
 
 double Triangle::intersect(Ray ray) const {
+    if (!aabb.intersect(ray)) return false;
     auto edge1 = v1 - v0;
     auto edge2 = v2 - v0;
     auto pvec = ray.direction.cross(edge2);
