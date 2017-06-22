@@ -8,6 +8,7 @@
 #include "Objects.h"
 #include "Light.h"
 #include "Camera.h"
+#include "KDNode.h"
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
@@ -24,6 +25,7 @@ private:
     bool verbose;
 
     std::vector<Object*> objects;
+    std::vector<KDNode*> kdtrees;
     std::vector<Light*> lightSources;
     std::string name;
     Color bgColor;
@@ -91,6 +93,7 @@ public:
     std::string getName() ;
     void setName(std::string name);
     void addObject(Object* obj);
+    void addKDTree(KDNode* node);
     void addLightSource(Light* l);
     void render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes=9);
     void renderPT(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes=9);

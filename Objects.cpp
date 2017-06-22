@@ -123,6 +123,9 @@ Rectangle::Rectangle(cv::Vec3d n, double d, cv::Vec3d corner, cv::Vec3d edge1, c
 }
 
 double Triangle::intersect(Ray ray) const {
+    if (!aabb.intersect(ray)) {
+        return -1;
+    }
     // compute plane's normal
     cv::Vec3d v0v1 = v1 - v0;
     cv::Vec3d v0v2 = v2 - v0;
@@ -201,4 +204,8 @@ Triangle::Triangle(cv::Vec3d v0, cv::Vec3d v1, cv::Vec3d v2) {
         if (v2[i] > max[i]) max[i] = v2[i];
     }
     this->aabb = AABB(min, max);
+}
+
+void Triangle::repr() const {
+
 }

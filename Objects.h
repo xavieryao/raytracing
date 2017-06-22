@@ -72,6 +72,7 @@ public:
     cv::Vec3d getMidPoint() const;
     virtual double intersect(Ray ray) const override;
     virtual cv::Vec3d normalVector(cv::Vec3d point) const override;
+    void repr() const override;
 };
 
 #endif //RAYTRACING_OBJECT_H

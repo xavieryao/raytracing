@@ -264,6 +264,17 @@ Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
         }
     }
 
+    double tt = -1;
+    Triangle* tri = nullptr;
+    for (auto kdtree: kdtrees) {
+        if (kdtree->hit(ray, tt, tri)) {
+            if (tt < t) {
+                t = tt;
+                object = tri;
+            }
+        }
+    }
+
     return object;
 }
 
@@ -391,4 +402,8 @@ Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
 
     Vec returnColor = object->material.emission + mixColor;
     return returnColor;
+}
+
+void World::addKDTree(KDNode *node) {
+    this->kdtrees.push_back(node);
 }

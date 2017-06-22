@@ -11,7 +11,7 @@ KDNode::KDNode(std::vector<Triangle *> & tris) {
     this->bbox = AABB();
 }
 
-KDNode *KDNode::build(std::vector<Triangle *> &tris, int depth) const {
+KDNode *KDNode::build(std::vector<Triangle *> &tris, int depth) {
     KDNode* node = new KDNode(tris);
 
     if (tris.size() == 0) {
@@ -71,7 +71,7 @@ KDNode *KDNode::build(std::vector<Triangle *> &tris, int depth) const {
 }
 
 bool KDNode::hit(const Ray &ray, double &t, Triangle*& tri) const {
-    if (bbox.intersect(ray) < 0) {
+    if (!bbox.intersect(ray)) {
         tri = nullptr;
         t = -1;
         return false;
