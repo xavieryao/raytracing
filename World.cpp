@@ -335,7 +335,7 @@ void World::renderPT(double l, double r, double b, double t, double d, int nx, i
     auto& ww = cam.w;
 
 #pragma omp parallel for collapse(2), schedule(dynamic, 1)
-    for (int i = 0; i < ny; ++i) {
+    for (int i : tqdm::range(ny)) {
         for (int j = 0; j < nx; ++j) {
             std::vector<double> sampleXs(sampleTimes);
             std::vector<double> sampleYs(sampleTimes);
@@ -407,6 +407,99 @@ Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
         } else {
             objColor *= (1/p);
         }
+    }
+
+    /*
+    * Refraction
+    */
+    if (object->material.dielectric) {
+
+
+        double kr, kg, kb;
+        Vec r = d - 2*(n.ddot(d))*n;
+        Ray reflectRay(intersection, r);
+
+        if (verbose) {
+            printf("反射线");
+            printVec(reflectRay.direction);
+        }
+
+        Vec tt;
+        double c = 0;
+
+        constexpr double _ep = 0.01;
+
+        if (d.ddot(n) < 0) { /* in */
+            if (verbose) {
+                printf("in\n");
+            }
+            refract(d, n, object->material.nt, tt);
+            c = -d.ddot(n);
+            kr = 1; kg = 1; kb = 1;
+        } else { /* out */
+            if (verbose) {
+                printf("out\n");
+            }
+
+            kr = exp(-object->material.ar*std::abs(t));
+            kg = exp(-object->material.ag*std::abs(t));
+            kb = exp(-object->material.ab*std::abs(t));
+            auto neg_n = -n;
+
+            if (refract(d, neg_n, 1/object->material.nt, tt)) {
+                c = (normalize(tt)).ddot(n);
+            } else {
+                Vec color = pathTracing(reflectRay, depth+1, _ep);
+                color[0] *= kb;
+                color[1] *= kg;
+                color[2] *= kr;
+                if (verbose) {
+                    printf("full refraction: "); printColor(color);
+                    printf("\n");
+                }
+
+                return color;
+            }
+        }
+        Ray refractRay(intersection, tt);
+        if (verbose) {
+            printf("折射线\n");
+            printVec(tt);
+        }
+        auto R0 = pow((object->material.nt-1)/(object->material.nt+1), 2);
+        auto R = R0 + (1-R0)*pow(1-c, 5);
+
+        assert(R >= 0 && R <= 1);
+
+        if (verbose) {
+            printf("反射\n");
+        }
+        Vec reflectColor = pathTracing(reflectRay, depth+1, _ep);
+        if (verbose) {printf("reflectColor:");printColor(reflectColor);}
+        if (verbose) printf("折射\n");
+        Vec refractColor = pathTracing(refractRay, depth+1, _ep);
+        if (verbose) {printf("refractColor:");printColor(refractColor);}
+
+        Vec color = R*reflectColor + (1-R)*refractColor;
+
+        if (verbose) printf("kb %.2f kg %.2f kr %.2f   before color: ", kb, kg, kr);
+        if (verbose) printColor(color);
+        color[0] *= kb;
+        color[1] *= kg;
+        color[2] *= kr;
+        if (verbose) printf("after color: ");
+        if (verbose) printColor(color);
+        if (verbose) printf("\n");
+        return color;
+    }
+
+    if (object->material.km != .0) {
+//        this->verbose = true;
+        Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
+        Ray mirrorRay(intersection, r);
+        Vec rColor = pathTracing(mirrorRay, depth+1, 0.01);
+        return object->material.km*rColor;
+//        this->verbose = false;
     }
 
     Vec dir = cosineRandomUnitVec(n);

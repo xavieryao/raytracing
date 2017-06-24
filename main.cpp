@@ -66,14 +66,14 @@ int main() {
     Plane* top = new Plane(Vec(0, -1, 0), 13, randMaterials[4], "top");
     Plane* back = new Plane(Vec(0, 0, -1), 30, randMaterials[6], "back");
 
-    randMaterials[5].emission = Vec(200, 200, 200);
+    randMaterials[5].emission = Vec(40, 40, 40);
     Rectangle* led = new Rectangle(Vec(0, -1, 0), 13, Vec(-6, 13, 4), Vec(6, 0, 0), Vec(0, 0, 6), randMaterials[5], "led");
     Rectangle* led2 = new Rectangle(Vec(0, -1, 0), 13, Vec(6, 13, 5), Vec(-6, 0, 0), Vec(0, 0, -6), randMaterials[5], "led");
 
 
     World w(Color(10, 10, 10), 0.5);
-    Light* light = new Light(cv::Vec3d(-8, 10, -2), cv::Vec3d(-0.03, 0.02, 0.02), cv::Vec3d(0.015, 0.02, 0.02), 1.5);
-    Light* light2 = new Light(cv::Vec3d(8, 10, -2), cv::Vec3d(0.12, 0.12, 0.12), cv::Vec3d(0.023, 0.02, 0.02), 1.5);
+    Light* light = new Light(cv::Vec3d(-8, 10, -2), cv::Vec3d(-0.6, 0.6, 0.6), cv::Vec3d(0.75, 1, 1), 1.5);
+//    Light* light2 = new Light(cv::Vec3d(8, 10, -2), cv::Vec3d(0.12, 0.12, 0.12), cv::Vec3d(0.023, 0.02, 0.02), 1.5);
 
     Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, m1, "sp");
     Sphere* anotherSp = new Sphere(Vec(3, 3, 5), 4, mirmat, "another_sp");
@@ -83,7 +83,7 @@ int main() {
     Sphere* distantSp = new Sphere(Vec(-8, 8, 20), 5, material, "distantSp");
 
     auto triangle = new Triangle(Vec(5,0,5), Vec(10,10,4), Vec(15,0,3));
-    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh.obj", Vec(5, 0, 10), 0.08, m2);
+    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh.obj", Vec(5, 0, 10), 0.08, m1);
 //    for (auto tri: tris) {
 //        w.addObject(tri);
 //    }
@@ -102,12 +102,12 @@ int main() {
 
 
     w.addLightSource(light);
-    w.addLightSource(light2);
+//    w.addLightSource(light2);
 
     w.addObject(sp);
     w.addObject(anotherSp);
     w.addObject(distantSp);
-    w.addObject(led);
+//    w.addObject(led);
     w.addObject(top);
     w.addObject(back);
     w.addObject(left);
@@ -118,15 +118,16 @@ int main() {
 
     w.addKDTree(kdtree);
 
-    constexpr int size = 500;
+    constexpr int size = 50;
 
-    constexpr int frame = 20;
+    constexpr int frame = 3;
 
     Camera cam(Vec(0,-2,-6));
     cam.pitch(10);
 
     double focus = 0.001;
-    w.render(-frame, frame, -frame, frame, 9, size, size, cam, 16);
+//    cam.focus = 0.05;
+    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 10000);
 
     /*
     for (int i = 0; i < 25; i++) {
