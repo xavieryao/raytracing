@@ -19,25 +19,23 @@ int main() {
     Material m1;
     m1.color = Color(100, 123, 5);
     m1.ks = Color(230, 230, 230);
-//    m1.emission = Vec(100, 100, 100);
     m1.ka = 0.9*m1.color;
     m1.p = 100;
     m1.dielectric = true;
     m1.ab = 0.00001;
     m1.ag = 0.00001;
     m1.ar = 0.00001;
-    m1.nt = 1.07;
+    m1.nt = 1.17;
 
     Material m2;
     m2.color = Color(100, 123, 5);
     m2.ks = Color(230, 230, 230);
-//   2m1.emission = Vec(100, 100, 100);
     m2.ka = 0.9*m1.color;
     m2.p = 100;
     m2.dielectric = true;
     m2.ab = 0.1;
-    m2.ag = 0.001;
-    m2.ar = 0.001;
+    m2.ag = 0.00001;
+    m2.ar = 0.00001;
     m2.nt = 1.17;
 
     Material randMaterials[10];
@@ -65,7 +63,7 @@ int main() {
     Plane* top = new Plane(Vec(0, -1, 0), 13, randMaterials[4], "top");
     Plane* back = new Plane(Vec(0, 0, -1), 30, randMaterials[6], "back");
 
-    randMaterials[5].emission = Vec(40, 40, 40);
+    randMaterials[5].emission = Vec(30, 30, 30);
     randMaterials[5].color = Vec(0, 0, 0);
     Rectangle* led = new Rectangle(Vec(0, -1, 0), 13, Vec(-6, 13, 4), Vec(6, 0, 0), Vec(0, 0, 6), randMaterials[5], "led");
     Rectangle* led2 = new Rectangle(Vec(0, -1, 0), 13, Vec(6, 13, 5), Vec(-6, 0, 0), Vec(0, 0, -6), randMaterials[5], "led");
@@ -73,18 +71,16 @@ int main() {
 
     World w(Color(10, 10, 10), 0.5);
     Light* light = new Light(cv::Vec3d(-8, 10, -2), cv::Vec3d(-0.6, 0.6, 0.6), cv::Vec3d(0.75, 1, 1), 1.5);
-//    Light* light2 = new Light(cv::Vec3d(8, 10, -2), cv::Vec3d(0.12, 0.12, 0.12), cv::Vec3d(0.023, 0.02, 0.02), 1.5);
 
-    Sphere* sp = new Sphere(Vec(0, -1 , 0), 3, m1, "sp");
-    Sphere* anotherSp = new Sphere(Vec(3, 3, 5), 4, mirmat, "another_sp");
+    Sphere* sp = new Sphere(Vec(0, -1 , 0), 2, m1, "sp");
+    Sphere* anotherSp = new Sphere(Vec(3, 3, 5), 3, mirmat, "another_sp");
+    Sphere* sp2 = new Sphere(Vec(-2, -1 , -3), 0.5, m1, "sp");
 
     Material material = randMaterials[9];
     material.km = 0;
     Sphere* distantSp = new Sphere(Vec(-8, 8, 20), 5, material, "distantSp");
 
-//    auto triangle = new Triangle(Vec(5,0,5), Vec(10,10,4), Vec(15,0,3));
-//    triangle->material = material;
-    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh_full.obj", Vec(5, 0, 10), 0.08, material);
+    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh_full.obj", Vec(2, 0, 0), 0.015, material);
 
     auto kdtree = KDNode::build(tris, 0);
 
@@ -93,6 +89,7 @@ int main() {
 //    w.addLightSource(light2);
 
     w.addObject(sp);
+//    w.addObject(sp2);
     w.addObject(anotherSp);
     w.addObject(distantSp);
     w.addObject(led);
@@ -106,14 +103,14 @@ int main() {
 
     w.addKDTree(kdtree);
 
-    constexpr int size = 300;
+    constexpr int size = 1000;
 
-    constexpr int frame = 20;
+    constexpr int frame = 17;
 
-    Camera cam(Vec(0,-2,-6));
-    cam.pitch(10);
+    Camera cam(Vec(0,-1.6,-4));
+    cam.pitch(-10);
 
-//    cam.focus = 0.05;
+    cam.focus = 0.08;
 
 
     /*
@@ -124,7 +121,7 @@ int main() {
         w.render(-frame, frame, -frame, frame, 9, size, size, cam, 1);
     }*/
 
-    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 100);
+    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 50000);
 
 
     return 0;

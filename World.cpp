@@ -340,51 +340,51 @@ void World::printColor(Vec &c) {
 void World::renderPT(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes) {
     auto mat = cv::Mat(nx, ny, CV_8UC3, cv::Scalar(bgColor[0], bgColor[1], bgColor[2]));
 
+    Vec** cache = new Vec*[nx];
+    for (int i = 0; i < nx; i++) {
+        cache[i] = new Vec[ny];
+        for (int j = 0; j < ny; j++) {
+            cache[i][j] = Vec(0., 0., 0.);
+        }
+    }
     auto& uu = cam.u;
     auto& vv = cam.v;
     auto& ww = cam.w;
 
-#pragma omp parallel for collapse(2), schedule(dynamic, 1)
-    for (int i : tqdm::range(ny)) {
-        for (int j = 0; j < nx; ++j) {
-            std::vector<double> sampleXs(sampleTimes);
-            std::vector<double> sampleYs(sampleTimes);
-            std::vector<double> cameraXs(sampleTimes);
-            std::vector<double> cameraYs(sampleTimes);
+    for (int s=0; s < sampleTimes; s++) {
+        printf("%d\n", s);
+#pragma omp parallel for schedule(dynamic, 1)
+        for (int i=0; i < ny; i++) {
+            for (int j = 0; j < nx; ++j) {
+                double blue = 0;
+                double green = 0;
+                double red = 0;
 
-            if (verbose) printf("pixel %d %d\n", i, j);
-
-            double blue = 0;
-            double green = 0;
-            double red = 0;
-            /*
-             * generate sample points
-             */
-            for (int ii = 0; ii < sampleTimes; ++ii) {
-                sampleXs[ii] = random();
-                sampleYs[ii] = random();
-                cameraXs[ii] = random();
-                cameraYs[ii] = random();
-            }
-            shuffle(cameraXs);
-            shuffle(cameraYs);
-
-            for (int k = 0; k < sampleTimes; k++) {
-                verbose = (i == 366 & j == 163 && k == 0);
-                auto u = l + (r - l) * (i + sampleXs[k]) / ny;
-                auto v = b + (t - b) * (j + sampleYs[k]) / nx;
+                auto u = l + (r - l) * (i + random()) / ny;
+                auto v = b + (t - b) * (j + random()) / nx;
                 auto direction = -d * ww + u * uu + v * vv;
-                auto ray = Ray(cam.randomEye(cameraXs[k], cameraYs[k]), direction);
+                auto ray = Ray(cam.randomEye(random(), random()), direction);
                 Vec color = pathTracing(ray);
                 blue += color[0] / sampleTimes;
                 green += color[1] / sampleTimes;
                 red += color[2] / sampleTimes;
+                cache[j][i] += Vec(blue, green, red);
             }
-
-            Vec v(blue, green, red);
-            mat.at<Color>(j, i) = vec2color(v);
+        }
+        printf("rendered\n");
+        if (s % 100 == 0) {
+            for (int i = 0; i < ny; ++i) {
+                for (int j = 0; j < nx; ++j) {
+                    Vec v = cache[j][i];
+                    v *= (double) sampleTimes / (double) s;
+                    mat.at<Color>(j, i) = vec2color(v);
+                }
+            }
+            auto filename = "/Users/xavieryao/cg/pt/" + std::to_string(s) + ".png";
+            cv::imwrite(filename, mat);
         }
     }
+
 
     /*
      * save image
