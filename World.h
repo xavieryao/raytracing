@@ -92,6 +92,7 @@ public:
     std::string getName() ;
     void setName(std::string name);
     void addObject(Object* obj);
+    void clearObjects();
     void addKDTree(KDNode* node);
     void addLightSource(Light* l);
     void render(double l, double r, double b, double t, double d, int nx, int ny, Camera& cam, unsigned sampleTimes=9);

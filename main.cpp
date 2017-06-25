@@ -7,7 +7,6 @@
 
 int main() {
 
-
     std::cout << "Hello, World!" << std::endl;
     srand(static_cast<unsigned int>(534599119));
 
@@ -67,6 +66,7 @@ int main() {
     Plane* back = new Plane(Vec(0, 0, -1), 30, randMaterials[6], "back");
 
     randMaterials[5].emission = Vec(40, 40, 40);
+    randMaterials[5].color = Vec(0, 0, 0);
     Rectangle* led = new Rectangle(Vec(0, -1, 0), 13, Vec(-6, 13, 4), Vec(6, 0, 0), Vec(0, 0, 6), randMaterials[5], "led");
     Rectangle* led2 = new Rectangle(Vec(0, -1, 0), 13, Vec(6, 13, 5), Vec(-6, 0, 0), Vec(0, 0, -6), randMaterials[5], "led");
 
@@ -82,23 +82,11 @@ int main() {
     material.km = 0;
     Sphere* distantSp = new Sphere(Vec(-8, 8, 20), 5, material, "distantSp");
 
-    auto triangle = new Triangle(Vec(5,0,5), Vec(10,10,4), Vec(15,0,3));
-    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh.obj", Vec(5, 0, 10), 0.08, m1);
-//    for (auto tri: tris) {
-//        w.addObject(tri);
-//    }
-//    w.addObject(tris[2]);
-//    Triangle* triangle = tris[1];
-//    triangle->material = randMaterials[2];
-//    tris.push_back(triangle);
-//    std::vector<Triangle*> triss;
-//    triss.push_back(triangle);
-//    triss.push_back(tris[1]);
-    auto kdtree = KDNode::build(tris, 0);
+//    auto triangle = new Triangle(Vec(5,0,5), Vec(10,10,4), Vec(15,0,3));
+//    triangle->material = material;
+    auto tris = Triangle::loadMeshes("/Users/xavieryao/tmp/mesh_full.obj", Vec(5, 0, 10), 0.08, material);
 
-    printf("tri a"); World::printVec(triangle->v0);
-    printf("tri b"); World::printVec(triangle->v1);
-    printf("tri c"); World::printVec(triangle->v2);
+    auto kdtree = KDNode::build(tris, 0);
 
 
     w.addLightSource(light);
@@ -107,7 +95,7 @@ int main() {
     w.addObject(sp);
     w.addObject(anotherSp);
     w.addObject(distantSp);
-//    w.addObject(led);
+    w.addObject(led);
     w.addObject(top);
     w.addObject(back);
     w.addObject(left);
@@ -118,25 +106,26 @@ int main() {
 
     w.addKDTree(kdtree);
 
-    constexpr int size = 50;
+    constexpr int size = 300;
 
-    constexpr int frame = 3;
+    constexpr int frame = 20;
 
     Camera cam(Vec(0,-2,-6));
     cam.pitch(10);
 
-    double focus = 0.001;
 //    cam.focus = 0.05;
-    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 10000);
+
 
     /*
-    for (int i = 0; i < 25; i++) {
-        cam.focus = focus;
-        w.setName(std::to_string(focus));
-        w.render(-frame, frame, -frame, frame, 9, size, size, cam, 16);
-        focus *= 2;
-    }
-     */
+    for (int i = 0; i < tris.size(); i++) {
+        printf("tris %d\n", i);
+        w.addObject(tris[i]);
+        w.setName(std::to_string(i));
+        w.render(-frame, frame, -frame, frame, 9, size, size, cam, 1);
+    }*/
+
+    w.renderPT(-frame, frame, -frame, frame, 9, size, size, cam, 100);
+
 
     return 0;
 }

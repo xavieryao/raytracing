@@ -48,10 +48,10 @@ void World::render(double l, double r, double b, double t, double d, int nx, int
 
             #pragma omp parallel for
             for (int k = 0; k < sampleTimes; k++) {
-                verbose = (i == 19 && j == 112 && k==1);
-                if (i == 19 && j == 112 && k==1) {
-                    verbose = true;
-                }
+//                verbose = (i == 19 && j == 112 && k==1);
+//                if (i == 19 && j == 112 && k==1) {
+//                    verbose = true;
+//                }
                 auto u = l + (r - l) * (i + sampleXs[k]) / ny;
                 auto v = b + (t - b) * (j + sampleYs[k]) / nx;
                 auto direction = -d * ww + u * uu + v * vv;
@@ -121,6 +121,12 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         n = -n;
     }
 
+    verbose = (object->name == "Untitled") && this->name == "4";
+
+    if (verbose) {
+        n = -n;
+    }
+
     if (verbose) {
         printf("交点 "); printVec(intersection);
         printf("法线 "); printVec(n);
@@ -150,7 +156,7 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
         Vec tt;
         double c = 0;
 
-        constexpr double _ep = 0.01;
+        constexpr double _ep = 0.0001;
 
         if (d.ddot(n) < 0) { /* in */
             if (verbose) {
@@ -229,13 +235,20 @@ Color World::rayTracing(Ray &ray, int depth, double epsilon){
             printf("shadow\n");
         }
         double s;
-        if (!hit(s, shadowRay, 0.01, max)) {
+        if (verbose) printf("triangle\n");
+        Object* shadowObj = hit(s, shadowRay, 0.01, max);
+        if (!shadowObj) {
             Vec h = normalize(v + lt);
             double a = n.ddot(lt);
             double b = n.ddot(h);
+//            printf("%f %f\n",a, b);
             color += object->material.color * light->intensity * std::max(0.0, a);
             color += object->material.ks * light->intensity * std::pow(std::max(0.0, b), object->material.p);
+        } else if (verbose) {
+            printf("shadowed by:\n");
+            shadowObj->repr();
         }
+        verbose = false;
     }
 
     /*
@@ -264,15 +277,11 @@ Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
     Object *object = nullptr;
     for (auto obj : objects) {
         auto tt = obj->intersect(ray);
-        if (verbose) {
-            printf("对物体 %s\n", obj->name.c_str());
-            printf("tt=%f\n", tt);
-        }
         if (tt > epsilon && tt < t && tt < max) {
             t = tt;
             object = obj;
             if (verbose) {
-                printf("接受\n");
+//                printf("接受 %s\n");
             }
         }
     }
@@ -280,19 +289,20 @@ Object *World::hit(double &t, Ray &ray, double epsilon, double max) {
     double tt = -1;
     Triangle* tri = nullptr;
 
-    if (verbose) {
-        //debug
-    }
-
     for (auto kdtree: kdtrees) {
         if (kdtree->hit(ray, tt, tri)) {
             if (tt > epsilon && tt < t && tt < max) {
                 t = tt;
                 object = tri;
-                if (verbose) {
-                    printf("kd tree hit\n");
-                }
             }
+        }
+    }
+
+    if (verbose) {
+        if (object == nullptr) {
+            printf("no hit.\n");
+        } else {
+            printf("hit %s at %f\n", object->name.c_str(), t);
         }
     }
 
@@ -350,29 +360,27 @@ void World::renderPT(double l, double r, double b, double t, double d, int nx, i
             /*
              * generate sample points
              */
-            for (int i = 0; i < sampleTimes; ++i) {
-                sampleXs[i] = random();
-                sampleYs[i] = random();
-                cameraXs[i] = random();
-                cameraYs[i] = random();
+            for (int ii = 0; ii < sampleTimes; ++ii) {
+                sampleXs[ii] = random();
+                sampleYs[ii] = random();
+                cameraXs[ii] = random();
+                cameraYs[ii] = random();
             }
             shuffle(cameraXs);
             shuffle(cameraYs);
 
-#pragma omp parallel for
             for (int k = 0; k < sampleTimes; k++) {
+                verbose = (i == 366 & j == 163 && k == 0);
                 auto u = l + (r - l) * (i + sampleXs[k]) / ny;
                 auto v = b + (t - b) * (j + sampleYs[k]) / nx;
                 auto direction = -d * ww + u * uu + v * vv;
                 auto ray = Ray(cam.randomEye(cameraXs[k], cameraYs[k]), direction);
-
-//                verbose = (i == 15 && j == 15 && k==0);
-
                 Vec color = pathTracing(ray);
                 blue += color[0] / sampleTimes;
                 green += color[1] / sampleTimes;
                 red += color[2] / sampleTimes;
             }
+
             Vec v(blue, green, red);
             mat.at<Color>(j, i) = vec2color(v);
         }
@@ -386,16 +394,28 @@ void World::renderPT(double l, double r, double b, double t, double d, int nx, i
 }
 
 Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
+    constexpr double _ep = 0.0001;
+
     double t;
     Object *object = hit(t, ray, epsilon);
     if (object == nullptr) {
+        if (verbose) {
+            printf("no object hit, return bgcolor\n");
+        }
         return color2vec(bgColor);
+    }
+
+    if (verbose) {
+        printf("hit object %s\n", object->name.c_str());
     }
 
     Vec intersection = ray.origin + t * ray.direction;
     Vec n = object->normalVector(intersection);
     Vec v = normalize(ray.origin - intersection);
     Vec d = normalize(ray.direction);
+    if (n.ddot(v) < 0) {
+        n = -n;
+    }
 
 
     Vec objColor = color2vec(object->material.color);
@@ -403,17 +423,22 @@ Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
 
     if (depth > 6) {
         if (std::abs(random()) > p) {
+            if (verbose) {
+                printf("deptn %d rnd > p\n", depth);
+            }
             return object->material.emission;
         } else {
             objColor *= (1/p);
+            if (verbose) printf("depth %d rnd <= p = %f, objColor %f %f %f\n", depth, p, objColor[0], objColor[1], objColor[2]);
         }
     }
 
     /*
     * Refraction
     */
-    if (object->material.dielectric) {
 
+    if (object->material.dielectric) {
+        if (verbose) printf("dielectric\n");
 
         double kr, kg, kb;
         Vec r = d - 2*(n.ddot(d))*n;
@@ -427,16 +452,15 @@ Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
         Vec tt;
         double c = 0;
 
-        constexpr double _ep = 0.01;
 
-        if (d.ddot(n) < 0) { /* in */
+        if (d.ddot(n) < 0) { // in
             if (verbose) {
                 printf("in\n");
             }
             refract(d, n, object->material.nt, tt);
             c = -d.ddot(n);
             kr = 1; kg = 1; kb = 1;
-        } else { /* out */
+        } else { // out
             if (verbose) {
                 printf("out\n");
             }
@@ -494,30 +518,40 @@ Vec World::pathTracing(Ray &ray, int depth, double epsilon) {
     }
 
     if (object->material.km != .0) {
-//        this->verbose = true;
+        if (verbose) printf("mirror \n");
         Vec r = ray.direction - 2*(n.ddot(ray.direction))*n;
         Ray mirrorRay(intersection, r);
-        Vec rColor = pathTracing(mirrorRay, depth+1, 0.01);
+        Vec rColor = pathTracing(mirrorRay, depth+1, _ep);
+        if (verbose) printf("mirror %f %f %f", rColor[0], rColor[1], rColor[2]);
         return object->material.km*rColor;
-//        this->verbose = false;
     }
 
+    if (verbose) printf("diffusion\n");
     Vec dir = cosineRandomUnitVec(n);
     Ray rndRay = Ray(intersection, dir);
-    Vec diffColor = pathTracing(rndRay, depth+1, 0.00001);
+    Vec diffColor = pathTracing(rndRay, depth+1, _ep);
+    if (verbose) printf("diff color %f %f %f\n", diffColor[0], diffColor[1], diffColor[2]);
 
     double cos_theta = dir.ddot(n) * 2;
+    assert(cos_theta >= 0);
 
     double blue = objColor[0], green = objColor[1], red = objColor[2];
     blue *= diffColor[0] * cos_theta; green *= diffColor[1]*cos_theta; red *= diffColor[2]*cos_theta;
 
 
     Vec mixColor(blue, green, red);
+    if (verbose) printf("mix color %f %f %f\n", mixColor[0], mixColor[1], mixColor[2]);
 
     Vec returnColor = object->material.emission + mixColor;
+    if (verbose) printf("return color %f %f %f\n", returnColor[0], returnColor[1], returnColor[2]);
+
     return returnColor;
 }
 
 void World::addKDTree(KDNode *node) {
     this->kdtrees.push_back(node);
+}
+
+void World::clearObjects() {
+    this->objects.clear();
 }

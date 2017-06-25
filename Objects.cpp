@@ -126,17 +126,23 @@ double Triangle::intersect(Ray ray) const {
     if (!aabb.intersect(ray)) return false;
     auto edge1 = v1 - v0;
     auto edge2 = v2 - v0;
+    // plane normal vector
     auto pvec = ray.direction.cross(edge2);
     auto det = edge1.ddot(pvec);
 
-    if (det < 0.00001) return -1;
+    if (det < 1e-8 && det > -1e-8) return -1;
+
+    double inv_det = 1/det;
+
     auto tvec = ray.origin - v0;
-    auto u = tvec.ddot(pvec);
-    if (u < 0 || u > det) return -1;
+    auto u = tvec.ddot(pvec) * inv_det;
+    if (u < 0 || u > 1) return -1;
+
     auto qvec = tvec.cross(edge1);
-    double v = ray.direction.dot(qvec);
-    if (v < 0 || u+v > det) return -1;
-    double t = edge2.ddot(qvec) / det;
+    double v = ray.direction.dot(qvec) * inv_det;
+    if (v < 0 || u+v > 1) return -1;
+    double t = edge2.ddot(qvec) * inv_det;
+//    assert(t > -0.0001);
     return t;
 }
 
@@ -172,7 +178,22 @@ Triangle::Triangle(cv::Vec3d v0, cv::Vec3d v1, cv::Vec3d v2) {
 }
 
 void Triangle::repr() const {
-
+    printf("v0");
+    for (int i = 0; i < 3; ++i) {
+        printf(" %f", v0[i]);
+    }
+    printf("\n");
+    printf("v1");
+    for (int i = 0; i < 3; ++i) {
+        printf(" %f", v1[i]);
+    }
+    printf("\n");
+    printf("v2");
+    for (int i = 0; i < 3; ++i) {
+        printf(" %f", v2[i]);
+    }
+    printf("\n");
+//    printf("v0 %f %f %f v1 %f %f %f v2 %f %f %f\n", v0[0])
 }
 
 std::vector<Triangle*> Triangle::loadMeshes(const std::string& filename, const cv::Vec3d zero,
@@ -197,6 +218,7 @@ std::vector<Triangle*> Triangle::loadMeshes(const std::string& filename, const c
             scanf("%d %d %d", &a, &b, &c);
             Triangle* tri = new Triangle(points[a-1], points[b-1], points[c-1]);
             tri->material = m;
+//            tri->repr();
             triangles.push_back(tri);
         }
     }
